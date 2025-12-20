@@ -8,6 +8,7 @@ import 'core/features/auth/presentation/pages/login_page.dart';
 import 'core/features/auth/presentation/pages/splash_page.dart';
 import 'core/network/dio_factory.dart';
 import 'features/dashboard/presentation/pages/dashboard_shell.dart';
+import 'features/appointments/presentation/pages/book_appointment_page.dart';
 
 void main() {
   final authDio = DioFactory.createAuthDio();
@@ -27,10 +28,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/splash',
       getPages: [
-        GetPage(name: '/dashboard', page: () => const DashboardShell()),
         GetPage(name: '/splash', page: () => const SplashPage()),
         GetPage(name: '/login', page: () => const LoginPage()),
-        GetPage(name: '/dashboard', page: () => const DashboardPage()),
+        GetPage(name: '/dashboard', page: () => const DashboardShell()),
+        GetPage(
+            name: '/book-appointment', page: () => const BookAppointmentPage()),
       ],
     );
   }

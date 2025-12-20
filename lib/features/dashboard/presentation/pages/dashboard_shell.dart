@@ -53,6 +53,20 @@ class DashboardShell extends StatelessWidget {
           children: tabs,
         ),
 
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            // Navigate to book appointment screen
+            Get.toNamed('/book-appointment');
+          },
+          backgroundColor: const Color(0xFF2196F3),
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+            size: 32,
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
         bottomNavigationBar: AppBottomNav(
           currentIndex: index,
           items: navItems,

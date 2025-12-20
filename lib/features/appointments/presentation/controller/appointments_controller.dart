@@ -10,6 +10,9 @@ class AppointmentsController extends GetxController {
   final isLoading = false.obs;
   final error = ''.obs;
   final appointments = <Appointment>[].obs;
+  final todayAppointments = <Appointment>[].obs;
+  final upcomingAppointments = <Appointment>[].obs;
+  final statistics = <String, dynamic>{}.obs;
 
   Future<void> loadAppointments() async {
     isLoading.value = true;
@@ -21,6 +24,158 @@ class AppointmentsController extends GetxController {
       error.value = e.message;
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> loadTodayAppointments() async {
+    try {
+      final list = await repo.today();
+      todayAppointments.assignAll(list);
+    } on ApiException catch (e) {
+      error.value = e.message;
+    }
+  }
+
+  Future<void> loadUpcomingAppointments() async {
+    try {
+      final list = await repo.upcoming();
+      upcomingAppointments.assignAll(list);
+    } on ApiException catch (e) {
+      error.value = e.message;
+    }
+  }
+
+  Future<void> loadStatistics() async {
+    try {
+      final stats = await repo.statistics();
+      statistics.assignAll(stats);
+    } on ApiException catch (e) {
+      error.value = e.message;
+    }
+  }
+
+  Future<Appointment?> getAppointmentById(int id) async {
+    try {
+      return await repo.getById(id);
+    } on ApiException catch (e) {
+      error.value = e.message;
+      return null;
+    }
+  }
+
+  Future<bool> createAppointment(Map<String, dynamic> payload) async {
+    try {
+      await repo.create(payload);
+      await loadAppointments(); // Refresh list
+      return true;
+    } on ApiException catch (e) {
+      error.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+  }
+
+  Future<bool> updateAppointment(int id, Map<String, dynamic> payload) async {
+    try {
+      await repo.update(id, payload);
+      await loadAppointments(); // Refresh list
+      return true;
+    } on ApiException catch (e) {
+      error.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+  }
+
+  Future<bool> cancelAppointment(int id) async {
+    try {
+      await repo.cancel(id);
+      await loadAppointments(); // Refresh list
+      Get.snackbar(
+        'Success',
+        'Appointment cancelled successfully',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return true;
+    } on ApiException catch (e) {
+      error.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+  }
+
+  Future<bool> checkInAppointment(int id) async {
+    try {
+      await repo.checkIn(id);
+      await loadAppointments(); // Refresh list
+      Get.snackbar(
+        'Success',
+        'Checked in successfully',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return true;
+    } on ApiException catch (e) {
+      error.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+  }
+
+  Future<bool> startAppointment(int id) async {
+    try {
+      await repo.start(id);
+      await loadAppointments(); // Refresh list
+      Get.snackbar(
+        'Success',
+        'Appointment started',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return true;
+    } on ApiException catch (e) {
+      error.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+  }
+
+  Future<bool> completeAppointment(int id) async {
+    try {
+      await repo.complete(id);
+      await loadAppointments(); // Refresh list
+      Get.snackbar(
+        'Success',
+        'Appointment completed',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return true;
+    } on ApiException catch (e) {
+      error.value = e.message;
+      Get.snackbar(
+        'Error',
+        e.message,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
     }
   }
 

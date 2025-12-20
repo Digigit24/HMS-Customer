@@ -28,22 +28,48 @@ class AppBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: onChanged,
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: scheme.primary,
-      unselectedItemColor: scheme.onSurfaceVariant,
-      showUnselectedLabels: true,
-      items: items
-          .map(
-            (i) => BottomNavigationBarItem(
-              icon: Icon(i.icon),
-              activeIcon: Icon(i.activeIcon ?? i.icon),
-              label: i.label,
-            ),
-          )
-          .toList(),
+    return BottomAppBar(
+      shape: const CircularNotchedRectangle(),
+      notchMargin: 8.0,
+      child: SizedBox(
+        height: 60,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: items.asMap().entries.map((entry) {
+            final index = entry.key;
+            final item = entry.value;
+            final isSelected = currentIndex == index;
+
+            return Expanded(
+              child: InkWell(
+                onTap: () => onChanged(index),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      isSelected ? (item.activeIcon ?? item.icon) : item.icon,
+                      color: isSelected
+                          ? scheme.primary
+                          : scheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item.label,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isSelected
+                            ? scheme.primary
+                            : scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 }
