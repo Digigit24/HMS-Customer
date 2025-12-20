@@ -56,7 +56,7 @@ class AppointmentsController extends GetxController {
 
   Future<Appointment?> getAppointmentById(int id) async {
     try {
-      return await repo.getById(id);
+      return await repo.getById(id.toString());
     } on ApiException catch (e) {
       error.value = e.message;
       return null;
@@ -81,7 +81,7 @@ class AppointmentsController extends GetxController {
 
   Future<bool> updateAppointment(int id, Map<String, dynamic> payload) async {
     try {
-      await repo.update(id, payload);
+      await repo.update(id.toString(), payload);
       await loadAppointments(); // Refresh list
       return true;
     } on ApiException catch (e) {
@@ -97,7 +97,7 @@ class AppointmentsController extends GetxController {
 
   Future<bool> cancelAppointment(int id) async {
     try {
-      await repo.cancel(id);
+      await repo.cancel(id.toString());
       await loadAppointments(); // Refresh list
       Get.snackbar(
         'Success',
@@ -118,7 +118,7 @@ class AppointmentsController extends GetxController {
 
   Future<bool> checkInAppointment(int id) async {
     try {
-      await repo.checkIn(id);
+      await repo.checkIn(id.toString());
       await loadAppointments(); // Refresh list
       Get.snackbar(
         'Success',
@@ -139,7 +139,7 @@ class AppointmentsController extends GetxController {
 
   Future<bool> startAppointment(int id) async {
     try {
-      await repo.start(id);
+      await repo.start(id.toString());
       await loadAppointments(); // Refresh list
       Get.snackbar(
         'Success',
@@ -160,7 +160,7 @@ class AppointmentsController extends GetxController {
 
   Future<bool> completeAppointment(int id) async {
     try {
-      await repo.complete(id);
+      await repo.complete(id.toString());
       await loadAppointments(); // Refresh list
       Get.snackbar(
         'Success',
