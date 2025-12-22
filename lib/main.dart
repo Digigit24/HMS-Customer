@@ -1,3 +1,5 @@
+// File Path: lib/main.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -7,6 +9,9 @@ import 'core/features/auth/presentation/pages/dashboard_page.dart';
 import 'core/features/auth/presentation/pages/login_page.dart';
 import 'core/features/auth/presentation/pages/splash_page.dart';
 import 'core/network/dio_factory.dart';
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_constants.dart';
+import 'core/theme/theme_controller.dart';
 import 'features/dashboard/presentation/pages/dashboard_shell.dart';
 
 void main() {
@@ -14,6 +19,7 @@ void main() {
   final authRepo = AuthRepository(authDio: authDio);
 
   Get.put(AuthController(repo: authRepo));
+  Get.put(ThemeController());
 
   runApp(const MyApp());
 }
@@ -23,15 +29,35 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/splash',
-      getPages: [
-        GetPage(name: '/dashboard', page: () => const DashboardShell()),
-        GetPage(name: '/splash', page: () => const SplashPage()),
-        GetPage(name: '/login', page: () => const LoginPage()),
-        GetPage(name: '/dashboard', page: () => const DashboardPage()),
-      ],
-    );
+    final themeController = Get.find<ThemeController>();
+
+    return Obx(() {
+      return GetMaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'HealthCare App',
+
+        // Theme configuration
+        theme: AppTheme.getTheme(
+          brightness: Brightness.light,
+          themeColor: themeController.themeColor,
+          fontFamily: themeController.fontFamily,
+        ),
+        darkTheme: AppTheme.getTheme(
+          brightness: Brightness.dark,
+          themeColor: themeController.themeColor,
+          fontFamily: themeController.fontFamily,
+        ),
+        themeMode: themeController.themeMode,
+
+        // Routes
+        initialRoute: '/splash',
+        getPages: [
+          GetPage(name: '/splash', page: () => const SplashPage()),
+          GetPage(name: '/login', page: () => const LoginPage()),
+          GetPage(name: '/dashboard', page: () => const DashboardShell()),
+          GetPage(name: '/dashboard-old', page: () => const DashboardPage()),
+        ],
+      );
+    });
   }
 }
