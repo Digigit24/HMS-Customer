@@ -1,5 +1,3 @@
-// File Path: lib/core/features/auth/presentation/pages/login_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:animate_do/animate_do.dart';
@@ -18,10 +16,7 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Animated Background
           const AnimatedBackground(),
-
-          // Main Content
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -32,7 +27,6 @@ class LoginPage extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // App Logo/Icon
                         FadeInDown(
                           duration: const Duration(milliseconds: 800),
                           child: Container(
@@ -43,7 +37,8 @@ class LoginPage extends StatelessWidget {
                               borderRadius: BorderRadius.circular(25),
                               boxShadow: [
                                 BoxShadow(
-                                  color: theme.colorScheme.primary.withOpacity(0.3),
+                                  color: theme.colorScheme.primary
+                                      .withOpacity(0.3),
                                   blurRadius: 20,
                                   offset: const Offset(0, 10),
                                 ),
@@ -57,8 +52,6 @@ class LoginPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 32),
-
-                        // App Name
                         FadeInUp(
                           duration: const Duration(milliseconds: 800),
                           delay: const Duration(milliseconds: 200),
@@ -73,8 +66,6 @@ class LoginPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-
-                        // Subtitle
                         FadeInUp(
                           duration: const Duration(milliseconds: 800),
                           delay: const Duration(milliseconds: 400),
@@ -90,54 +81,47 @@ class LoginPage extends StatelessWidget {
                       ],
                     ),
                   ),
-
-                  // Login Buttons
                   Expanded(
                     flex: 1,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Google Sign In
                         FadeInUp(
                           duration: const Duration(milliseconds: 800),
                           delay: const Duration(milliseconds: 600),
-                          child: Obx(
-                            () => SocialLoginButton(
-                              onPressed: () {
-                                // TODO: Implement Google Sign In
-                                Get.offAllNamed('/dashboard');
-                              },
-                              icon: Icons.g_mobiledata,
-                              label: 'Continue with Google',
-                              backgroundColor: Colors.white,
-                              textColor: Colors.black87,
-                              borderColor: const Color(0xFFE2E8F0),
-                              isLoading: false,
-                            ),
-                          ),
+                          child: Obx(() => SocialLoginButton(
+                                onPressed: c.isLoading.value
+                                    ? null
+                                    : () async {
+                                        // TODO: Implement Google Sign In
+                                        Get.offAllNamed('/dashboard');
+                                      },
+                                icon: Icons.g_mobiledata,
+                                label: 'Continue with Google',
+                                backgroundColor: Colors.white,
+                                textColor: Colors.black87,
+                                borderColor: const Color(0xFFE2E8F0),
+                                isLoading: c.isLoading.value,
+                              )),
                         ),
                         const SizedBox(height: 16),
-
-                        // Apple Sign In
                         FadeInUp(
                           duration: const Duration(milliseconds: 800),
                           delay: const Duration(milliseconds: 800),
-                          child: Obx(
-                            () => SocialLoginButton(
-                              onPressed: () {
-                                // TODO: Implement Apple Sign In
-                              },
-                              icon: Icons.apple,
-                              label: 'Continue with Apple',
-                              backgroundColor: Colors.black,
-                              textColor: Colors.white,
-                              isLoading: false,
-                            ),
-                          ),
+                          child: Obx(() => SocialLoginButton(
+                                onPressed: c.isLoading.value
+                                    ? null
+                                    : () async {
+                                        // TODO: Implement Apple Sign In
+                                      },
+                                icon: Icons.apple,
+                                label: 'Continue with Apple',
+                                backgroundColor: Colors.black,
+                                textColor: Colors.white,
+                                isLoading: c.isLoading.value,
+                              )),
                         ),
                         const SizedBox(height: 32),
-
-                        // Terms and Privacy
                         FadeInUp(
                           duration: const Duration(milliseconds: 800),
                           delay: const Duration(milliseconds: 1000),
@@ -145,7 +129,8 @@ class LoginPage extends StatelessWidget {
                             'By continuing, you agree to our Terms of Service\nand Privacy Policy',
                             textAlign: TextAlign.center,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
+                              color: theme.colorScheme.onSurfaceVariant
+                                  .withOpacity(0.7),
                             ),
                           ),
                         ),

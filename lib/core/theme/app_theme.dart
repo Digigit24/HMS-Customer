@@ -22,9 +22,13 @@ class AppTheme {
       brightness: brightness,
       colorScheme: _getColorScheme(colors, brightness),
       textTheme: textTheme,
-      scaffoldBackgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8F9FA),
+      scaffoldBackgroundColor:
+          isDark ? const Color(0xFF0F172A) : const Color(0xFFF8F9FA),
       appBarTheme: _getAppBarTheme(isDark, textTheme),
+
+      // ✅ FIX: ThemeData.cardTheme expects CardThemeData? (not CardTheme widget)
       cardTheme: _getCardTheme(isDark),
+
       elevatedButtonTheme: _getElevatedButtonTheme(colors),
       outlinedButtonTheme: _getOutlinedButtonTheme(colors, isDark),
       textButtonTheme: _getTextButtonTheme(colors),
@@ -37,29 +41,38 @@ class AppTheme {
     );
   }
 
-  static ColorScheme _getColorScheme(Map<String, Color> colors, Brightness brightness) {
+  static ColorScheme _getColorScheme(
+      Map<String, Color> colors, Brightness brightness) {
     final isDark = brightness == Brightness.dark;
 
     return ColorScheme(
       brightness: brightness,
       primary: colors['primary']!,
       onPrimary: Colors.white,
-      primaryContainer: isDark ? colors['primaryDark']! : colors['primaryLight']!,
+      primaryContainer:
+          isDark ? colors['primaryDark']! : colors['primaryLight']!,
       onPrimaryContainer: isDark ? Colors.white : colors['primaryDark']!,
       secondary: colors['secondary']!,
       onSecondary: Colors.white,
-      secondaryContainer: isDark ? colors['secondary']!.withOpacity(0.3) : colors['secondary']!.withOpacity(0.1),
+      secondaryContainer: isDark
+          ? colors['secondary']!.withOpacity(0.3)
+          : colors['secondary']!.withOpacity(0.1),
       onSecondaryContainer: isDark ? Colors.white : colors['secondary']!,
       error: colors['error']!,
       onError: Colors.white,
-      errorContainer: isDark ? colors['error']!.withOpacity(0.3) : colors['error']!.withOpacity(0.1),
+      errorContainer: isDark
+          ? colors['error']!.withOpacity(0.3)
+          : colors['error']!.withOpacity(0.1),
       onErrorContainer: isDark ? Colors.white : colors['error']!,
       surface: isDark ? const Color(0xFF1E293B) : Colors.white,
       onSurface: isDark ? Colors.white : const Color(0xFF1F2937),
-      surfaceContainerHighest: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
-      onSurfaceVariant: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+      surfaceContainerHighest:
+          isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+      onSurfaceVariant:
+          isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
       outline: isDark ? const Color(0xFF475569) : const Color(0xFFE2E8F0),
-      outlineVariant: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+      outlineVariant:
+          isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
       shadow: Colors.black.withOpacity(0.1),
       inverseSurface: isDark ? Colors.white : const Color(0xFF0F172A),
       onInverseSurface: isDark ? const Color(0xFF0F172A) : Colors.white,
@@ -68,8 +81,8 @@ class AppTheme {
   }
 
   static TextTheme _getTextTheme(AppFontFamily fontFamily, bool isDark) {
-    final baseTextTheme = isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme;
-    final fontFamilyName = FontFamilies.getFontFamily(fontFamily);
+    final baseTextTheme =
+        isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme;
 
     switch (fontFamily) {
       case AppFontFamily.inter:
@@ -94,12 +107,14 @@ class AppTheme {
         fontWeight: FontWeight.w600,
         color: isDark ? Colors.white : const Color(0xFF1F2937),
       ),
-      systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      systemOverlayStyle:
+          isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
     );
   }
 
-  static CardTheme _getCardTheme(bool isDark) {
-    return CardTheme(
+  // ✅ FIXED: Return CardThemeData (ThemeData.cardTheme uses this)
+  static CardThemeData _getCardTheme(bool isDark) {
+    return CardThemeData(
       elevation: isDark ? 2 : 1,
       color: isDark ? const Color(0xFF1E293B) : Colors.white,
       surfaceTintColor: Colors.transparent,
@@ -110,7 +125,8 @@ class AppTheme {
     );
   }
 
-  static ElevatedButtonThemeData _getElevatedButtonTheme(Map<String, Color> colors) {
+  static ElevatedButtonThemeData _getElevatedButtonTheme(
+      Map<String, Color> colors) {
     return ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: colors['primary'],
@@ -129,7 +145,8 @@ class AppTheme {
     );
   }
 
-  static OutlinedButtonThemeData _getOutlinedButtonTheme(Map<String, Color> colors, bool isDark) {
+  static OutlinedButtonThemeData _getOutlinedButtonTheme(
+      Map<String, Color> colors, bool isDark) {
     return OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: colors['primary'],
@@ -189,11 +206,13 @@ class AppTheme {
     );
   }
 
-  static BottomNavigationBarThemeData _getBottomNavTheme(Map<String, Color> colors, bool isDark) {
+  static BottomNavigationBarThemeData _getBottomNavTheme(
+      Map<String, Color> colors, bool isDark) {
     return BottomNavigationBarThemeData(
       backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
       selectedItemColor: colors['primary'],
-      unselectedItemColor: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+      unselectedItemColor:
+          isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
       type: BottomNavigationBarType.fixed,
       elevation: 8,
       selectedLabelStyle: const TextStyle(
@@ -207,7 +226,8 @@ class AppTheme {
     );
   }
 
-  static FloatingActionButtonThemeData _getFloatingActionButtonTheme(Map<String, Color> colors) {
+  static FloatingActionButtonThemeData _getFloatingActionButtonTheme(
+      Map<String, Color> colors) {
     return FloatingActionButtonThemeData(
       backgroundColor: colors['primary'],
       foregroundColor: Colors.white,
@@ -220,7 +240,8 @@ class AppTheme {
 
   static ChipThemeData _getChipTheme(Map<String, Color> colors, bool isDark) {
     return ChipThemeData(
-      backgroundColor: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+      backgroundColor:
+          isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
       deleteIconColor: colors['primary'],
       labelStyle: TextStyle(
         color: isDark ? Colors.white : const Color(0xFF1F2937),

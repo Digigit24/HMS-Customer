@@ -1,12 +1,10 @@
-// File Path: lib/core/features/auth/presentation/widgets/social_login_button.dart
-
 import 'package:flutter/material.dart';
-import '../../../../theme/theme_constants.dart';
 
 class SocialLoginButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final Future<void> Function()? onPressed; // ✅ nullable + async-safe
   final IconData icon;
   final String label;
+
   final Color backgroundColor;
   final Color textColor;
   final Color? borderColor;
@@ -20,48 +18,54 @@ class SocialLoginButton extends StatelessWidget {
     required this.backgroundColor,
     required this.textColor,
     this.borderColor,
-    this.isLoading = false,
+    required this.isLoading,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final disabled = isLoading || onPressed == null;
+
     return SizedBox(
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
+        onPressed:
+            disabled ? null : () async => await onPressed?.call(), // ✅ safe
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
           foregroundColor: textColor,
           elevation: 0,
-          shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            side: borderColor != null
-                ? BorderSide(color: borderColor!, width: 1.5)
-                : BorderSide.none,
+            borderRadius: BorderRadius.circular(16),
+            side:
+                BorderSide(color: borderColor ?? Colors.transparent, width: 1),
           ),
         ),
         child: isLoading
             ? SizedBox(
-                height: 20,
-                width: 20,
+                width: 22,
+                height: 22,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(textColor),
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    textColor == Colors.white
+                        ? Colors.white
+                        : theme.colorScheme.primary,
+                  ),
                 ),
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, size: 24),
+                  Icon(icon, size: 22),
                   const SizedBox(width: 12),
                   Text(
                     label,
-                    style: TextStyle(
-                      fontSize: 16,
+                    style: const TextStyle(
+                      fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: textColor,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ],
