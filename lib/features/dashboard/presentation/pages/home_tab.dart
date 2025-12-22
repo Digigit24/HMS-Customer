@@ -1,8 +1,14 @@
+// File Path: lib/features/dashboard/presentation/pages/home_tab.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../core/utils/app_colors.dart';
+import 'package:animate_do/animate_do.dart';
+import '../../../../core/widgets/custom_search_bar.dart';
+import '../../../../core/theme/theme_constants.dart';
 import '../../../appointments/presentation/controller/appointments_controller.dart';
-import 'package:intl/intl.dart';
+import '../widgets/dashboard_feature_card.dart';
+import '../widgets/appointment_card.dart';
+import '../widgets/info_banner.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -23,96 +29,39 @@ class _HomeTabState extends State<HomeTab> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor:
+          isDark ? const Color(0xFF0F172A) : const Color(0xFFF8F9FA),
       body: SafeArea(
         child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Section
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Hi Dwiky!',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[900],
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'May you always in a good condition',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.notifications_outlined,
-                        size: 24,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              const SizedBox(height: 24),
 
-              // Search Bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
+              // Header - Greeting
+              FadeInDown(
+                duration: const Duration(milliseconds: 400),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.search, color: Colors.grey[600]),
-                            const SizedBox(width: 12),
-                            Text(
-                              'symptoms, diseases...',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
+                    Text(
+                      'Hi Dwiky!',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 24,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        Icons.tune,
-                        color: Colors.grey[800],
+                    const SizedBox(height: 6),
+                    Text(
+                      'May you always in a good condition',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 14,
                       ),
                     ),
                   ],
@@ -120,385 +69,124 @@ class _HomeTabState extends State<HomeTab> {
               ),
 
               const SizedBox(height: 24),
+
+              // Search Bar with Filter
+              FadeInDown(
+                duration: const Duration(milliseconds: 500),
+                delay: const Duration(milliseconds: 100),
+                child: CustomSearchBar(
+                  hintText: 'symptoms, diseases...',
+                  showFilter: true,
+                  onFilterTap: () {
+                    // TODO: Implement filter
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 28),
 
               // Upcoming Appointment Card
-              _buildUpcomingAppointmentCard(),
+              FadeInUp(
+                duration: const Duration(milliseconds: 600),
+                delay: const Duration(milliseconds: 200),
+                child: AppointmentCard(
+                  doctorName: 'Dr. Stone Gaze',
+                  specialty: 'Ear, Nose & Throat specialist',
+                  imageUrl: 'assets/images/1.png',
+                  date: 'Wed, 10 Jan, 2024',
+                  time: 'Morning set: 11:00',
+                  onTap: () {
+                    // TODO: Navigate to appointment details
+                  },
+                  onMessageTap: () {
+                    // TODO: Open chat
+                  },
+                ),
+              ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
 
-              // Action Blocks Grid
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
+              // Feature Cards Grid
+              FadeInUp(
+                duration: const Duration(milliseconds: 600),
+                delay: const Duration(milliseconds: 300),
+                child: GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 1.0,
                   children: [
-                    Expanded(
-                      child: _buildActionBlock(
-                        icon: Icons.calendar_month,
-                        title: 'Book an',
-                        subtitle: 'Appointment',
-                        description: 'Find a Doctor or\nspecialist',
-                        backgroundColor: const Color(0xFFE8EAF6),
-                        iconColor: const Color(0xFF5C6BC0),
-                        onTap: () {
-                          Get.toNamed('/book-appointment');
-                        },
-                      ),
+                    // Book an Appointment
+                    DashboardFeatureCard(
+                      icon: Icons.event_note,
+                      iconBackgroundColor: const Color(0xFF6366F1),
+                      iconColor: const Color(0xFF6366F1),
+                      title: 'Book an\nAppointment',
+                      subtitle: 'Find a Doctor or\nspecialist',
+                      onTap: () {
+                        // TODO: Navigate to booking
+                      },
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildActionBlock(
-                        icon: Icons.qr_code_scanner,
-                        title: 'Appointment',
-                        subtitle: 'with QR',
-                        description: 'Queuing without the\nhustle',
-                        backgroundColor: const Color(0xFFE0F2F1),
-                        iconColor: const Color(0xFF26A69A),
-                        onTap: () {
-                          Get.snackbar(
-                            'QR Appointment',
-                            'Feature coming soon',
-                            snackPosition: SnackPosition.BOTTOM,
-                          );
-                        },
-                      ),
+                    // Appointment with QR
+                    DashboardFeatureCard(
+                      icon: Icons.qr_code_2,
+                      iconBackgroundColor: const Color(0xFF10B981),
+                      iconColor: const Color(0xFF10B981),
+                      title: 'Appointment\nwith QR',
+                      subtitle: 'Queuing without the\nhustle',
+                      onTap: () {
+                        // TODO: Navigate to QR scanner
+                      },
+                    ),
+                    // Request Consultation
+                    DashboardFeatureCard(
+                      icon: Icons.headset_mic,
+                      iconBackgroundColor: const Color(0xFFF97316),
+                      iconColor: const Color(0xFFF97316),
+                      title: 'Request\nConsultation',
+                      subtitle: 'Talk to specialist',
+                      onTap: () {
+                        // TODO: Navigate to consultation
+                      },
+                    ),
+                    // Locate a Pharmacy
+                    DashboardFeatureCard(
+                      icon: Icons.local_pharmacy,
+                      iconBackgroundColor: const Color(0xFFEC4899),
+                      iconColor: const Color(0xFFEC4899),
+                      title: 'Locate a\nPharmacy',
+                      subtitle: 'Purchase Medicines',
+                      onTap: () {
+                        // TODO: Navigate to pharmacy locator
+                      },
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 28),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _buildActionBlock(
-                        icon: Icons.chat_bubble_outline,
-                        title: 'Request',
-                        subtitle: 'Consultation',
-                        description: 'Talk to specialist',
-                        backgroundColor: const Color(0xFFFFF3E0),
-                        iconColor: const Color(0xFFFF9800),
-                        onTap: () {
-                          Get.snackbar(
-                            'Consultation',
-                            'Feature coming soon',
-                            snackPosition: SnackPosition.BOTTOM,
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildActionBlock(
-                        icon: Icons.local_pharmacy,
-                        title: 'Locate a',
-                        subtitle: 'Pharmacy',
-                        description: 'Purchase Medicines',
-                        backgroundColor: const Color(0xFFFCE4EC),
-                        iconColor: const Color(0xFFE91E63),
-                        onTap: () {
-                          // Navigate to pharmacy tab
-                          Get.find<dynamic>().changeTab?.call(2);
-                        },
-                      ),
-                    ),
-                  ],
+              // Info Banner - COVID Prevention
+              FadeInUp(
+                duration: const Duration(milliseconds: 600),
+                delay: const Duration(milliseconds: 400),
+                child: InfoBanner(
+                  title: 'Prevent the spread\nof COVID-19 Virus',
+                  subtitle: 'Find out how',
+                  icon: Icons.coronavirus_outlined,
+                  backgroundColor: const Color(0xFF4F46E5),
+                  iconColor: Colors.white.withOpacity(0.3),
+                  onTap: () {
+                    // TODO: Navigate to COVID info
+                  },
                 ),
               ),
 
-              const SizedBox(height: 24),
-
-              // COVID-19 Banner
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF2196F3),
-                        Color(0xFF64B5F6),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Prevent the spread',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              'of COVID-19 Virus',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Text(
-                                  'Find out how',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Icon(
-                                  Icons.arrow_forward,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.coronavirus_outlined,
-                          color: Colors.white,
-                          size: 40,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 100), // Space for bottom nav
+              const SizedBox(height: 32),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUpcomingAppointmentCard() {
-    try {
-      final controller = Get.find<AppointmentsController>();
-      return Obx(() {
-        final appointments = controller.appointments
-            .where((a) =>
-                a.status == 'scheduled' &&
-                (a.scheduledAt?.isAfter(DateTime.now()) ?? false))
-            .toList();
-
-        if (appointments.isEmpty) {
-          return const SizedBox.shrink();
-        }
-
-        // Sort by scheduled time
-        appointments.sort((a, b) =>
-            (a.scheduledAt ?? DateTime.now())
-                .compareTo(b.scheduledAt ?? DateTime.now()));
-
-        final appointment = appointments.first;
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 24,
-                      backgroundColor: Colors.white,
-                      child: appointment.doctorImage != null
-                          ? ClipOval(
-                              child: Image.network(
-                                appointment.doctorImage!,
-                                width: 48,
-                                height: 48,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Icon(
-                                  Icons.person,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                            )
-                          : const Icon(
-                              Icons.person,
-                              color: AppColors.primary,
-                            ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            appointment.doctorName ?? 'Doctor',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            appointment.doctorSpecialty ?? 'Specialist',
-                            style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.message_outlined,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.calendar_today,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            appointment.scheduledAt != null
-                                ? DateFormat('E, d MMM, yyyy')
-                                    .format(appointment.scheduledAt!)
-                                : 'N/A',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.access_time,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          appointment.appointmentTime ?? 'N/A',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      });
-    } catch (_) {
-      return const SizedBox.shrink();
-    }
-  }
-
-  Widget _buildActionBlock({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required String description,
-    required Color backgroundColor,
-    required Color iconColor,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 28,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
-              ),
-            ),
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[800],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              description,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-                height: 1.4,
-              ),
-            ),
-          ],
         ),
       ),
     );

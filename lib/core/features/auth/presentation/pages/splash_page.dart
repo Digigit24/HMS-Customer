@@ -13,7 +13,11 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => Get.find<AuthController>().checkAuthAndRoute());
+
+    // More stable than Future.microtask for navigation
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.find<AuthController>().checkAuthAndRoute();
+    });
   }
 
   @override
