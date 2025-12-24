@@ -52,16 +52,29 @@ class _PharmacyTabState extends State<PharmacyTab> {
               await controller.loadProducts();
               await controller.loadCart();
             },
-            child: ListView(
-              padding: const EdgeInsets.all(16),
+            child: Column(
               children: [
-                _buildHeader(theme),
-                const SizedBox(height: 12),
-                _buildSearchField(),
-                const SizedBox(height: 12),
-                _buildCategoriesAndFilter(),
-                const SizedBox(height: 12),
-                if (controller.error.isNotEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  color: theme.brightness == Brightness.dark
+                      ? const Color(0xFF0F172A)
+                      : const Color(0xFFF8F9FA),
+                  child: Column(
+                    children: [
+                      _buildHeader(theme),
+                      const SizedBox(height: 12),
+                      _buildSearchField(),
+                      const SizedBox(height: 12),
+                      _buildCategoriesAndFilter(),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      if (controller.error.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Text(
@@ -114,6 +127,9 @@ class _PharmacyTabState extends State<PharmacyTab> {
                     },
                   ),
                 const SizedBox(height: 80),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

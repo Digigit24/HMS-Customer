@@ -36,9 +36,14 @@ class PharmacyController extends GetxController {
     try {
       final data = await repo.fetchProducts();
       products.assignAll(data);
+      print('✅ Loaded ${data.length} products');
     } on ApiException catch (e) {
       error.value = e.message;
       AppToast.showError(e.message);
+      print('❌ Error loading products: ${e.message}');
+    } catch (e) {
+      error.value = 'Failed to load products';
+      print('❌ Unexpected error loading products: $e');
     } finally {
       isLoadingProducts.value = false;
     }
