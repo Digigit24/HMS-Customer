@@ -173,7 +173,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                           ),
                         ),
                         Text(
-                          '\$${(item.totalPrice ?? item.priceAtTime ?? 0).toStringAsFixed(2)}',
+                          '₹${(item.totalPrice ?? item.priceAtTime ?? 0).toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
@@ -206,7 +206,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                       ),
                     ),
                     Text(
-                      '\$${order.totalAmount.toStringAsFixed(2)}',
+                      '₹${order.totalAmount.toStringAsFixed(2)}',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,

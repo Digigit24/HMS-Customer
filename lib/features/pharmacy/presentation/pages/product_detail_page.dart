@@ -88,7 +88,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         Row(
                           children: [
                             Text(
-                              '\$${price.toStringAsFixed(2)}',
+                              '₹${price.toStringAsFixed(2)}',
                               style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w800,
@@ -98,7 +98,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             if (discount > 0) ...[
                               const SizedBox(width: 12),
                               Text(
-                                '\$${originalPrice.toStringAsFixed(2)}',
+                                '₹${originalPrice.toStringAsFixed(2)}',
                                 style: TextStyle(
                                   fontSize: 16,
                                   decoration: TextDecoration.lineThrough,
@@ -603,7 +603,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       Row(
                         children: [
                           const Text(
-                            '\$25.00',
+                            '₹25.00',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
@@ -612,7 +612,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           ),
                           const SizedBox(width: 6),
                           const Text(
-                            '\$95.00',
+                            '₹95.00',
                             style: TextStyle(
                               fontSize: 10,
                               decoration: TextDecoration.lineThrough,

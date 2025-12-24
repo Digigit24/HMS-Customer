@@ -340,7 +340,7 @@ class _PharmacyTabState extends State<PharmacyTab> {
                     Row(
                       children: [
                         Text(
-                          '\$${price.toStringAsFixed(2)}',
+                          '₹${price.toStringAsFixed(2)}',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -350,7 +350,7 @@ class _PharmacyTabState extends State<PharmacyTab> {
                         if (discount > 0) ...[
                           const SizedBox(width: 6),
                           Text(
-                            '\$${originalPrice.toStringAsFixed(2)}',
+                            '₹${originalPrice.toStringAsFixed(2)}',
                             style: TextStyle(
                               fontSize: 11,
                               decoration: TextDecoration.lineThrough,
@@ -422,7 +422,7 @@ class _PharmacyTabState extends State<PharmacyTab> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Total: \$${totalAmount.toStringAsFixed(2)}',
+                    'Total: ₹${totalAmount.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,

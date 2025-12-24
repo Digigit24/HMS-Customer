@@ -265,7 +265,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     ),
                   ),
                   Text(
-                    '\$${price.toStringAsFixed(2)}',
+                    '₹${price.toStringAsFixed(2)}',
                     style: const TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w700,
@@ -440,14 +440,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
         ),
         child: Column(
           children: [
-            _buildSummaryRow('Total deal', '\$${totalDeal.toStringAsFixed(2)}'),
+            _buildSummaryRow('Total deal', '₹${totalDeal.toStringAsFixed(2)}'),
             const SizedBox(height: 10),
-            _buildSummaryRow('Voucher', '-\$${voucherDiscount.toStringAsFixed(2)}',
+            _buildSummaryRow('Voucher', '-₹${voucherDiscount.toStringAsFixed(2)}',
                 valueColor: const Color(0xFF10B981)),
             const SizedBox(height: 10),
             const Divider(height: 1, color: Color(0xFFE2E8F0)),
             const SizedBox(height: 10),
-            _buildSummaryRow('Total', '\$${total.toStringAsFixed(2)}',
+            _buildSummaryRow('Total', '₹${total.toStringAsFixed(2)}',
                 isBold: true),
           ],
         ),

@@ -210,7 +210,7 @@ class AppointmentDetailPage extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '\$${appointment.consultationFee}',
+                      '₹${appointment.consultationFee}',
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,

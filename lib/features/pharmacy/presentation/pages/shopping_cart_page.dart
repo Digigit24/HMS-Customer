@@ -214,7 +214,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                '\$${price.toStringAsFixed(2)}',
+                '₹${price.toStringAsFixed(2)}',
                 style: const TextStyle(
                   color: AppColors.primary,
                   fontWeight: FontWeight.w700,
@@ -362,7 +362,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '\$${cart.totalAmount.toStringAsFixed(2)}',
+                  '₹${cart.totalAmount.toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
