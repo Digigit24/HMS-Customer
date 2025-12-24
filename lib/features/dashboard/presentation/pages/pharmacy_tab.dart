@@ -7,7 +7,9 @@ import '../../../../core/utils/app_toast.dart';
 import '../../../pharmacy/data/repositories/pharmacy_repository.dart';
 import '../../../pharmacy/data/models/product.dart';
 import '../../../pharmacy/presentation/controller/pharmacy_controller.dart';
-import '../../../pharmacy/presentation/pages/checkout_page.dart';
+import '../../../pharmacy/presentation/pages/shopping_cart_page.dart';
+import '../../../pharmacy/presentation/pages/product_detail_page.dart';
+import '../../../pharmacy/presentation/widgets/filter_bottom_sheet.dart';
 
 class PharmacyTab extends StatefulWidget {
   const PharmacyTab({super.key});
@@ -58,7 +60,7 @@ class _PharmacyTabState extends State<PharmacyTab> {
                 const SizedBox(height: 12),
                 _buildSearchField(),
                 const SizedBox(height: 12),
-                _buildCategories(),
+                _buildCategoriesAndFilter(),
                 const SizedBox(height: 12),
                 if (controller.error.isNotEmpty)
                   Padding(
@@ -132,21 +134,58 @@ class _PharmacyTabState extends State<PharmacyTab> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Pharmacy',
+              'Online Pharmacy',
               style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 4),
-            Text(
-              'Order your medicines quickly',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+            Row(
+              children: [
+                Text(
+                  'Online Pharmacy',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                const Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+                const SizedBox(width: 6),
+                Text(
+                  'Prescription Drugs',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                const Icon(Icons.chevron_right, size: 14, color: Color(0xFF94A3B8)),
+                const SizedBox(width: 6),
+                Text(
+                  'Analgesic',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-        IconButton(
-          onPressed: controller.loadCart,
-          icon: const Icon(Icons.shopping_bag_outlined),
+        Row(
+          children: [
+            IconButton(
+              onPressed: () {
+                Get.to(() => ShoppingCartPage(controller: controller));
+              },
+              icon: const Icon(Icons.search_outlined),
+            ),
+            IconButton(
+              onPressed: () {
+                Get.to(() => ShoppingCartPage(controller: controller));
+              },
+              icon: const Icon(Icons.shopping_bag_outlined),
+            ),
+          ],
         ),
       ],
     );
@@ -169,6 +208,33 @@ class _PharmacyTabState extends State<PharmacyTab> {
           search = val.trim();
         });
       },
+    );
+  }
+
+  Widget _buildCategoriesAndFilter() {
+    return Row(
+      children: [
+        Expanded(child: _buildCategories()),
+        const SizedBox(width: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: IconButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => const FilterBottomSheet(),
+              );
+            },
+            icon: const Icon(Icons.tune, color: Colors.white),
+            padding: const EdgeInsets.all(8),
+          ),
+        ),
+      ],
     );
   }
 
@@ -211,7 +277,14 @@ class _PharmacyTabState extends State<PharmacyTab> {
     final price = product.sellingPrice ?? product.mrp ?? 0;
     final inStock = product.isInStock && (product.quantity ?? 1) > 0;
 
-    return Container(
+    return GestureDetector(
+      onTap: () {
+        Get.to(() => ProductDetailPage(
+              product: product,
+              controller: controller,
+            ));
+      },
+      child: Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -326,6 +399,7 @@ class _PharmacyTabState extends State<PharmacyTab> {
           ),
         ],
       ),
+      ),
     );
   }
 
@@ -412,7 +486,7 @@ class _PharmacyTabState extends State<PharmacyTab> {
                 onPressed: controller.isPlacingOrder.value
                     ? null
                     : () {
-                        Get.to(() => CheckoutPage(controller: controller));
+                        Get.to(() => ShoppingCartPage(controller: controller));
                       },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,

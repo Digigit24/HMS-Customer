@@ -16,7 +16,8 @@ class CheckoutPage extends StatefulWidget {
 
 class _CheckoutPageState extends State<CheckoutPage> {
   final notesCtrl = TextEditingController();
-  final voucherCtrl = TextEditingController();
+  String selectedPayment = 'Payment on delivery cod';
+  double voucherDiscount = 50.0;
 
   @override
   void initState() {
@@ -27,7 +28,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
   @override
   void dispose() {
     notesCtrl.dispose();
-    voucherCtrl.dispose();
     super.dispose();
   }
 
@@ -39,34 +39,19 @@ class _CheckoutPageState extends State<CheckoutPage> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        foregroundColor: const Color(0xFF1E293B),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () => Navigator.pop(context),
+        ),
         titleSpacing: 0,
-        title: Row(
-          children: [
-            const SizedBox(width: 4),
-            const Text(
-              'Shopping Cart',
-              style: TextStyle(fontWeight: FontWeight.w800),
-            ),
-            const SizedBox(width: 8),
-            Obx(() {
-              final count = widget.controller.cart.value?.totalItems ?? 0;
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  count.toString(),
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              );
-            }),
-          ],
+        title: const Text(
+          'Check Out',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+            color: Color(0xFF1E293B),
+          ),
         ),
       ),
       body: Obx(() {
@@ -84,418 +69,268 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Widget _buildContent(ThemeData theme, PharmacyCart cart) {
-    return Container(
-      color: const Color(0xFFF6F8FB),
-      child: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _shippingBlock(theme),
-                  const SizedBox(height: 16),
-                  _cartItemsBlock(theme, cart),
-                  const SizedBox(height: 16),
-                  _voucherBlock(theme),
-                  const SizedBox(height: 12),
-                  _paymentBlock(theme),
-                  const SizedBox(height: 16),
-                  _notesBlock(theme),
-                  const SizedBox(height: 16),
-                  _summary(theme, cart),
-                ],
-              ),
-            ),
-          ),
-          _confirmBar(cart),
-        ],
-      ),
-    );
-  }
-
-  Widget _shippingBlock(ThemeData theme) {
-    return _card(
-      theme,
-      child: Row(
-        children: [
-          const Icon(Icons.location_on_outlined, color: AppColors.primary),
-          const SizedBox(width: 12),
-          Expanded(
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Address Shipping',
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '23 Estean, New York City, USA',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
+                const SizedBox(height: 16),
+                _buildAddressSection(theme),
+                const SizedBox(height: 20),
+                _buildDeliveryInfoCard(theme, cart),
+                const SizedBox(height: 20),
+                _buildVoucherSection(theme),
+                const SizedBox(height: 12),
+                _buildPaymentSection(theme),
+                const SizedBox(height: 20),
+                _buildNotesSection(theme),
+                const SizedBox(height: 20),
+                _buildSummary(theme, cart),
+                const SizedBox(height: 20),
               ],
             ),
           ),
-          const Text(
-            'Change',
-            style: TextStyle(
-              color: AppColors.primary,
-              fontWeight: FontWeight.w700,
-            ),
+        ),
+        _buildBottomBar(cart),
+      ],
+    );
+  }
+
+  Widget _buildAddressSection(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Address Shipping',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1E293B),
+                ),
+              ),
+              TextButton(
+                onPressed: () {},
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  'Change',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.location_on_outlined,
+                  size: 16, color: theme.colorScheme.onSurfaceVariant),
+              const SizedBox(width: 6),
+              Text(
+                '23 Estean, New York City, USA',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _cartItemsBlock(ThemeData theme, PharmacyCart cart) {
-    return _card(
-      theme,
-      padding: EdgeInsets.zero,
+  Widget _buildDeliveryInfoCard(ThemeData theme, PharmacyCart cart) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(16),
+              color: const Color(0xFFF0F9FF),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                const Icon(Icons.access_time, color: AppColors.primary),
+                const Icon(Icons.access_time, color: AppColors.primary, size: 20),
                 const SizedBox(width: 8),
-                Expanded(
+                const Expanded(
                   child: Text(
                     'Orders will be delivered by 18:00 Tomorrow',
-                    style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                ),
-                const Text(
-                  'Change',
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w700,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1E293B),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          ...cart.cartItems.map((item) => Column(
+          const SizedBox(height: 16),
+          ...cart.cartItems.map((item) {
+            final price = item.totalPrice ??
+                item.priceAtTime ??
+                (item.product.sellingPrice ?? item.product.mrp ?? 0);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
                 children: [
-                  _cartItemRow(theme, item),
-                  if (item != cart.cartItems.last)
-                    Divider(height: 16, color: theme.dividerColor.withOpacity(0.3)),
-                ],
-              )),
-        ],
-      ),
-    );
-  }
-
-  Widget _cartItemRow(ThemeData theme, PharmacyCartItem item) {
-    final price = item.totalPrice ??
-        item.priceAtTime ??
-        (item.product.sellingPrice ?? item.product.mrp ?? 0);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.08),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: item.product.imageUrl != null && item.product.imageUrl!.isNotEmpty
-              ? Image.network(
-                  item.product.imageUrl!,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      const Icon(Icons.local_pharmacy, color: AppColors.primary),
-                )
-              : const Icon(Icons.local_pharmacy, color: AppColors.primary),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                item.product.productName,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${item.product.category?.name ?? 'Tablets'} • Qty: ${item.quantity.toString().padLeft(2, '0')}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: item.product.imageUrl != null &&
+                            item.product.imageUrl!.isNotEmpty
+                        ? Image.network(
+                            item.product.imageUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.local_pharmacy,
+                              color: AppColors.primary,
+                              size: 24,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.local_pharmacy,
+                            color: AppColors.primary,
+                            size: 24,
+                          ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.product.productName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Text(
+                              '${item.product.category?.name ?? 'Tablets'} • ${item.product.quantity ?? 50} Pills',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Icon(Icons.shopping_bag_outlined,
+                                size: 14, color: theme.colorScheme.onSurfaceVariant),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Quatity: ${item.quantity.toString().padLeft(2, '0')}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                   Text(
-                    '₹${price.toStringAsFixed(2)}',
+                    '\$${price.toStringAsFixed(2)}',
                     style: const TextStyle(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w700,
                       fontSize: 15,
                     ),
                   ),
-                  _quantityStepper(item),
                 ],
               ),
-            ],
-          ),
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVoucherSection(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
         ),
-        IconButton(
-          onPressed: () => _remove(item),
-          icon: const Icon(Icons.delete_outline, color: Colors.grey),
-        ),
-      ],
-    );
-  }
-
-  Widget _quantityStepper(PharmacyCartItem item) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
-        color: Colors.white,
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => _decrement(item),
-            icon: const Icon(Icons.remove),
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            padding: EdgeInsets.zero,
-          ),
-          Container(
-            width: 36,
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              item.quantity.toString().padLeft(2, '0'),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          IconButton(
-            onPressed: () => _increment(item),
-            icon: const Icon(Icons.add),
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            padding: EdgeInsets.zero,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _voucherBlock(ThemeData theme) {
-    return _card(
-      theme,
-      child: Row(
-        children: [
-          const Icon(Icons.card_giftcard_outlined, color: AppColors.primary),
-          const SizedBox(width: 10),
-          Expanded(
-            child: TextField(
-              controller: voucherCtrl,
-              decoration: const InputDecoration(
-                hintText: 'MediXpert Voucher',
-                border: InputBorder.none,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              FocusScope.of(context).unfocus();
-              AppToast.showInfo('Voucher applied (mock)');
-            },
-            child: const Text(
-              'APPLY',
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _paymentBlock(ThemeData theme) {
-    return _card(
-      theme,
-      child: Row(
-        children: [
-          const Icon(Icons.payment, color: AppColors.primary),
-          const SizedBox(width: 10),
-          const Expanded(
-            child: Text(
-              'Payment on delivery (COD)',
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
-          ),
-          Icon(Icons.chevron_right, color: theme.iconTheme.color),
-        ],
-      ),
-    );
-  }
-
-  Widget _notesBlock(ThemeData theme) {
-    return _card(
-      theme,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Notes for MediXpert',
-            style: TextStyle(fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: notesCtrl,
-            maxLines: 4,
-            maxLength: 225,
-            decoration: InputDecoration(
-              hintText: 'Take some notes for the shipper',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              counterText: '',
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _summary(ThemeData theme, PharmacyCart cart) {
-    final subtotal = cart.totalAmount;
-    final voucher = 0.0;
-    final total = subtotal - voucher;
-    return _card(
-      theme,
-      child: Column(
-        children: [
-          _summaryRow('Total items', cart.totalItems.toString(), theme),
-          const SizedBox(height: 8),
-          _summaryRow('Subtotal', '₹${subtotal.toStringAsFixed(2)}', theme),
-          const SizedBox(height: 8),
-          _summaryRow('Voucher', '-₹${voucher.toStringAsFixed(2)}', theme,
-              valueColor: Colors.red),
-          const Divider(height: 20),
-          _summaryRow('Total', '₹${total.toStringAsFixed(2)}', theme,
-              isBold: true),
-        ],
-      ),
-    );
-  }
-
-  Widget _summaryRow(String label, String value, ThemeData theme,
-      {bool isBold = false, Color? valueColor}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-            fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontWeight: isBold ? FontWeight.w800 : FontWeight.w700,
-            color: valueColor ?? theme.colorScheme.onSurface,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _confirmBar(PharmacyCart cart) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            offset: Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
         child: Row(
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Total',
-                    style: TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '₹${cart.totalAmount.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ],
+            Icon(Icons.card_giftcard_outlined,
+                size: 20, color: theme.colorScheme.onSurfaceVariant),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                'MediXpert Voucher',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF64748B),
+                ),
               ),
             ),
-            SizedBox(
-              width: 150,
-              child: Obx(() {
-                final loading = widget.controller.isPlacingOrder.value;
-                return ElevatedButton(
-                  onPressed: loading ? null : _confirmOrder,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+            TextButton(
+              onPressed: () {},
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                backgroundColor: AppColors.primary.withOpacity(0.08),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Row(
+                children: const [
+                  Text(
+                    'MEDIXPERT',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
                     ),
                   ),
-                  child: loading
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text(
-                          'Checkout',
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                );
-              }),
+                  SizedBox(width: 4),
+                  Icon(Icons.chevron_right, color: AppColors.primary, size: 18),
+                ],
+              ),
             ),
           ],
         ),
@@ -503,23 +338,202 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _card(ThemeData theme, {required Widget child, EdgeInsets? padding}) {
-    return Container(
-      width: double.infinity,
-      padding: padding ?? const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.4)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+  Widget _buildPaymentSection(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.payment, color: AppColors.primary, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Payment',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF64748B),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    selectedPayment,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: Color(0xFF94A3B8), size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotesSection(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Notes for MediXpert',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1E293B),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: TextField(
+              controller: notesCtrl,
+              maxLines: 4,
+              maxLength: 225,
+              decoration: InputDecoration(
+                hintText: 'Take some notes for the shipper',
+                hintStyle: TextStyle(
+                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                  fontSize: 14,
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.all(14),
+                counterStyle: const TextStyle(
+                  fontSize: 11,
+                  color: Color(0xFF94A3B8),
+                ),
+              ),
+            ),
           ),
         ],
       ),
-      child: child,
+    );
+  }
+
+  Widget _buildSummary(ThemeData theme, PharmacyCart cart) {
+    final totalDeal = cart.totalAmount;
+    final total = totalDeal - voucherDiscount;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Column(
+          children: [
+            _buildSummaryRow('Total deal', '\$${totalDeal.toStringAsFixed(2)}', theme),
+            const SizedBox(height: 10),
+            _buildSummaryRow('Voucher', '-\$${voucherDiscount.toStringAsFixed(2)}',
+                theme,
+                valueColor: const Color(0xFF10B981)),
+            const SizedBox(height: 10),
+            const Divider(height: 1, color: Color(0xFFE2E8F0)),
+            const SizedBox(height: 10),
+            _buildSummaryRow('Total', '\$${total.toStringAsFixed(2)}', theme,
+                isBold: true),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(String label, String value, ThemeData theme,
+      {bool isBold = false, Color? valueColor}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: const Color(0xFF64748B),
+            fontWeight: isBold ? FontWeight.w600 : FontWeight.w500,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: isBold ? 18 : 15,
+            fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
+            color: valueColor ?? const Color(0xFF1E293B),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBottomBar(PharmacyCart cart) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Obx(() {
+          final loading = widget.controller.isPlacingOrder.value;
+          return SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: loading ? null : _confirmOrder,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: loading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: Colors.white,
+                      ),
+                    )
+                  : const Text(
+                      'Confirm',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+            ),
+          );
+        }),
+      ),
     );
   }
 
@@ -530,27 +544,29 @@ class _CheckoutPageState extends State<CheckoutPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.remove_shopping_cart_outlined,
-                size: 64, color: AppColors.primary),
-            const SizedBox(height: 12),
+            const Icon(Icons.shopping_cart_outlined,
+                size: 80, color: AppColors.primary),
+            const SizedBox(height: 16),
             const Text(
               'Your cart is empty',
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(
               'Add items from the pharmacy to continue.',
+              textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium
                   ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () => Get.back(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
               ),
-              child: const Text('Browse products'),
+              child: const Text('Browse Products'),
             ),
           ],
         ),
@@ -561,7 +577,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   Future<void> _confirmOrder() async {
     final order = await widget.controller.checkout(
       notes: notesCtrl.text,
-      voucherCode: voucherCtrl.text,
+      voucherCode: 'MEDIXPERT',
     );
     if (order == null) {
       if (widget.controller.error.value.isNotEmpty) {
@@ -570,30 +586,5 @@ class _CheckoutPageState extends State<CheckoutPage> {
       return;
     }
     Get.off(() => OrderSuccessPage(order: order));
-  }
-
-  Future<void> _increment(PharmacyCartItem item) async {
-    final ok = await widget.controller.incrementItem(item.product);
-    if (ok) {
-      await widget.controller.loadCart();
-      setState(() {});
-    }
-  }
-
-  Future<void> _decrement(PharmacyCartItem item) async {
-    final ok = await widget.controller.decrementItem(item.product);
-    if (ok) {
-      await widget.controller.loadCart();
-      setState(() {});
-    }
-  }
-
-  Future<void> _remove(PharmacyCartItem item) async {
-    for (var i = 0; i < item.quantity; i++) {
-      final ok = await widget.controller.decrementItem(item.product);
-      if (!ok) break;
-    }
-    await widget.controller.loadCart();
-    setState(() {});
   }
 }
