@@ -175,7 +175,7 @@ class _PharmacyTabState extends State<PharmacyTab> {
           children: [
             IconButton(
               onPressed: () {
-                Get.to(() => ShoppingCartPage(controller: controller));
+                // TODO: Implement search functionality
               },
               icon: const Icon(Icons.search_outlined),
             ),
