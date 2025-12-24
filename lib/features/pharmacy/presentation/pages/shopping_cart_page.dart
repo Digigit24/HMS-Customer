@@ -339,6 +339,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   }
 
   Widget _buildBottomBar(PharmacyCart cart) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
