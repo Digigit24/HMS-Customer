@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:animate_do/animate_do.dart';
 import '../../../../core/theme/theme_constants.dart';
 import '../../../../core/theme/theme_controller.dart';
+import 'appointment_history_page.dart';
+import 'order_history_page.dart';
 
 class SettingsTab extends StatelessWidget {
   const SettingsTab({super.key});
@@ -80,10 +82,40 @@ class SettingsTab extends StatelessWidget {
 
               const SizedBox(height: 16),
 
-              // Account Section
+              // History Section
               FadeInUp(
                 duration: const Duration(milliseconds: 500),
                 delay: const Duration(milliseconds: 100),
+                child: _SectionCard(
+                  title: 'History',
+                  children: [
+                    _SettingItem(
+                      icon: Icons.event_note_outlined,
+                      title: 'Appointment History',
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        Get.to(() => const AppointmentHistoryPage());
+                      },
+                    ),
+                    const Divider(height: 1),
+                    _SettingItem(
+                      icon: Icons.receipt_long_outlined,
+                      title: 'Order History',
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        Get.to(() => const OrderHistoryPage());
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Account Section
+              FadeInUp(
+                duration: const Duration(milliseconds: 500),
+                delay: const Duration(milliseconds: 150),
                 child: _SectionCard(
                   title: 'Account',
                   children: [
@@ -116,7 +148,7 @@ class SettingsTab extends StatelessWidget {
               // Support Section
               FadeInUp(
                 duration: const Duration(milliseconds: 500),
-                delay: const Duration(milliseconds: 200),
+                delay: const Duration(milliseconds: 250),
                 child: _SectionCard(
                   title: 'Support',
                   children: [
@@ -149,7 +181,7 @@ class SettingsTab extends StatelessWidget {
               // Logout Button
               FadeInUp(
                 duration: const Duration(milliseconds: 500),
-                delay: const Duration(milliseconds: 300),
+                delay: const Duration(milliseconds: 350),
                 child: SizedBox(
                   width: double.infinity,
                   height: 52,
