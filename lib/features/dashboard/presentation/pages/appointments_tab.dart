@@ -6,6 +6,7 @@ import '../../../appointments/data/repositories/appointment_repository.dart';
 import '../../../appointments/presentation/controller/appointments_controller.dart';
 import '../../../../core/network/hms_dio_factory.dart';
 import '../../../../core/utils/app_colors.dart';
+import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/storage/token_storage.dart';
 import '../../../appointments/presentation/pages/appointment_detail_page.dart';
 import '../../../appointments/data/models/doctor.dart';
@@ -64,6 +65,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
 
   Widget _buildDoctorPicker(void Function(void Function()) setModalState) {
     final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
     final doctors = controller.doctors;
 
     return Column(
@@ -134,13 +136,13 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                               return ListTile(
                                 leading: CircleAvatar(
                                   backgroundColor:
-                                      AppColors.primary.withOpacity(0.1),
+                                      primaryColor.withOpacity(0.1),
                                   child: Text(
                                     doc.name.isNotEmpty
                                         ? doc.name[0].toUpperCase()
                                         : '?',
-                                    style: const TextStyle(
-                                      color: AppColors.primary,
+                                    style: TextStyle(
+                                      color: primaryColor,
                                       fontWeight: FontWeight.w700,
                                     ),
                                   ),
@@ -179,7 +181,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.person_outline, color: AppColors.primary),
+                Icon(Icons.person_outline, color: primaryColor),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -284,79 +286,89 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
 
-    return Obx(() {
-      final isLoading = controller.isLoading.value;
-      final hasError = controller.error.value.isNotEmpty;
-      final isEmpty = controller.appointments.isEmpty;
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: Obx(() {
+        final isLoading = controller.isLoading.value;
+        final hasError = controller.error.value.isNotEmpty;
+        final isEmpty = controller.appointments.isEmpty;
 
-      return Column(
-        children: [
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: controller.refreshList,
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _buildHeader(theme),
-                  const SizedBox(height: 16),
-                  _buildDateSelector(),
-                  const SizedBox(height: 12),
-                  _buildSlotSection('Morning Set', morningSlots),
-                  const SizedBox(height: 12),
-                  _buildSlotSection('Afternoon Set', afternoonSlots),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () => _openCreateSheet(
-                      context,
-                      prefillDate: selectedDate,
-                      prefillTime: selectedTime,
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(52),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Add Appointment',
-                      style: TextStyle(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Your Appointments',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  if (isLoading)
-                    const Center(child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      child: CircularProgressIndicator(),
-                    )),
-                  if (hasError) _buildErrorState(),
-                  if (!isLoading && !hasError && isEmpty) _buildEmptyState(),
-                  if (!isLoading && !hasError && !isEmpty)
-                    ...List.generate(
-                      controller.appointments.length,
-                      (i) => Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: _buildAppointmentCard(
-                          controller.appointments[i],
+        return SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: controller.refreshList,
+                  child: ListView(
+                    padding: EdgeInsets.all(context.padding(16)),
+                    children: [
+                      _buildHeader(theme),
+                      SizedBox(height: context.spacing(16)),
+                      _buildDateSelector(),
+                      SizedBox(height: context.spacing(12)),
+                      _buildSlotSection('Morning Set', morningSlots),
+                      SizedBox(height: context.spacing(12)),
+                      _buildSlotSection('Afternoon Set', afternoonSlots),
+                      SizedBox(height: context.spacing(20)),
+                      ElevatedButton(
+                        onPressed: () => _openCreateSheet(
+                          context,
+                          prefillDate: selectedDate,
+                          prefillTime: selectedTime,
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: primaryColor,
+                          foregroundColor: Colors.white,
+                          minimumSize: Size.fromHeight(context.spacing(52)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: Text(
+                          'Add Appointment',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: context.fontSize(16),
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                      SizedBox(height: context.spacing(24)),
+                      Text(
+                        'Your Appointments',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          fontSize: context.fontSize(16),
+                        ),
+                      ),
+                      SizedBox(height: context.spacing(10)),
+                      if (isLoading)
+                        Center(child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: context.padding(12)),
+                          child: const CircularProgressIndicator(),
+                        )),
+                      if (hasError) _buildErrorState(),
+                      if (!isLoading && !hasError && isEmpty) _buildEmptyState(),
+                      if (!isLoading && !hasError && !isEmpty)
+                        ...List.generate(
+                          controller.appointments.length,
+                          (i) => Padding(
+                            padding: EdgeInsets.only(bottom: context.spacing(14)),
+                            child: _buildAppointmentCard(
+                              controller.appointments[i],
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      );
-    });
+        );
+      }),
+    );
   }
 
   Widget _buildHeader(ThemeData theme) {
@@ -419,17 +431,18 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
   Widget _buildDateSelector() {
     final days = List.generate(7, (i) => selectedDate.add(Duration(days: i)));
     final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
     final cardColor = theme.cardColor;
     final selectedText = theme.colorScheme.onPrimary;
     final unselectedText = theme.colorScheme.onSurfaceVariant;
     final unselectedBg = theme.colorScheme.surfaceVariant;
 
     return SizedBox(
-      height: 86,
+      height: context.spacing(86),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: days.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, __) => SizedBox(width: context.spacing(8)),
         itemBuilder: (context, index) {
           final day = days[index];
           final isSelected = _isSameDay(day, selectedDate);
@@ -442,12 +455,12 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
               });
             },
             child: Container(
-              width: 68,
+              width: context.spacing(68),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : unselectedBg,
+                color: isSelected ? primaryColor : unselectedBg,
                 borderRadius: BorderRadius.circular(16),
               ),
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: EdgeInsets.symmetric(vertical: context.padding(12)),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -456,16 +469,16 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                     style: TextStyle(
                       color: isSelected ? selectedText : unselectedText,
                       fontWeight: FontWeight.w600,
-                      fontSize: 13,
+                      fontSize: context.fontSize(13),
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: context.spacing(6)),
                   Text(
                     dayNum,
                     style: TextStyle(
                       color: isSelected ? selectedText : theme.colorScheme.onSurface,
                       fontWeight: FontWeight.w700,
-                      fontSize: 18,
+                      fontSize: context.fontSize(18),
                     ),
                   ),
                 ],
@@ -479,20 +492,21 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
 
   Widget _buildSlotSection(String title, List<String> slots) {
     final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w700,
-            fontSize: 15,
+            fontSize: context.fontSize(15),
           ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: context.spacing(10)),
         Wrap(
-          spacing: 10,
-          runSpacing: 10,
+          spacing: context.spacing(10),
+          runSpacing: context.spacing(10),
           children: slots.map((slot) {
             final isSelected = slot == selectedTime;
             final isDisabled = false; // hook to disable if needed
@@ -506,12 +520,13 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                         selectedTime = slot;
                       });
                     },
-              selectedColor: AppColors.primary,
+              selectedColor: primaryColor,
               labelStyle: TextStyle(
                 color: isSelected
                     ? Colors.white
                     : theme.colorScheme.onSurface,
                 fontWeight: FontWeight.w600,
+                fontSize: context.fontSize(14),
               ),
               backgroundColor:
                   isDisabled ? theme.disabledColor.withOpacity(0.2) : theme.cardColor,
@@ -519,7 +534,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                 borderRadius: BorderRadius.circular(12),
                 side: BorderSide(
                   color: isSelected
-                      ? AppColors.primary
+                      ? primaryColor
                       : theme.dividerColor,
                 ),
               ),
@@ -531,6 +546,8 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
   }
 
   Widget _buildErrorState() {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -555,7 +572,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
             ElevatedButton(
               onPressed: controller.loadAppointments,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: primaryColor,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
@@ -571,6 +588,8 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
   }
 
   Widget _buildEmptyState() {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -580,22 +599,22 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.08),
+                color: primaryColor.withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.calendar_today_outlined,
                 size: 58,
-                color: AppColors.primary,
+                color: primaryColor,
               ),
             ),
             const SizedBox(height: 18),
-            const Text(
+            Text(
               'No appointments yet',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: Colors.black87,
+                color: theme.colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 10),
@@ -604,7 +623,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[600],
+                color: theme.colorScheme.onSurfaceVariant,
                 height: 1.4,
               ),
             ),
@@ -615,7 +634,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                 OutlinedButton(
                   onPressed: () => Get.toNamed('/book-appointment'),
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: AppColors.primary),
+                    side: BorderSide(color: primaryColor),
                   ),
                   child: const Text('Book'),
                 ),
@@ -625,7 +644,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                   icon: const Icon(Icons.add),
                   label: const Text('Create'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: primaryColor,
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -641,6 +660,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
     final statusColor = _getStatusColor(appointment.status);
     final statusIcon = _getStatusIcon(appointment.status);
     final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
     final cardColor = theme.cardColor;
     final borderColor = theme.dividerColor.withOpacity(0.4);
     final textColor = theme.colorScheme.onSurface;
@@ -675,7 +695,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                 children: [
                   CircleAvatar(
                     radius: 28,
-                    backgroundColor: AppColors.primary.withOpacity(0.1),
+                    backgroundColor: primaryColor.withOpacity(0.1),
                     child: appointment.doctorImage != null
                         ? ClipOval(
                             child: Image.network(
@@ -683,17 +703,17 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                               width: 56,
                               height: 56,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => const Icon(
+                              errorBuilder: (_, __, ___) => Icon(
                                 Icons.person,
                                 size: 28,
-                                color: AppColors.primary,
+                                color: primaryColor,
                               ),
                             ),
                           )
-                        : const Icon(
+                        : Icon(
                             Icons.person,
                             size: 28,
-                            color: AppColors.primary,
+                            color: primaryColor,
                           ),
                   ),
                   const SizedBox(width: 12),
@@ -762,13 +782,13 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
+                            color: primaryColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.calendar_today,
                             size: 18,
-                            color: AppColors.primary,
+                            color: primaryColor,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -807,13 +827,13 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
+                            color: primaryColor.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.access_time,
                             size: 18,
-                            color: AppColors.primary,
+                            color: primaryColor,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -1090,7 +1110,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                               child: ElevatedButton(
                                 onPressed: submit,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
+                                  backgroundColor: theme.colorScheme.primary,
                                   foregroundColor: Colors.white,
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 14),

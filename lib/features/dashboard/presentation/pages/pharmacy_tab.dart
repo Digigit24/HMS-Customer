@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../../../core/network/hms_dio_factory.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/app_toast.dart';
+import '../../../../core/utils/responsive_utils.dart';
 import '../../../pharmacy/data/repositories/pharmacy_repository.dart';
 import '../../../pharmacy/data/models/product.dart';
 import '../../../pharmacy/presentation/controller/pharmacy_controller.dart';
@@ -38,24 +39,27 @@ class _PharmacyTabState extends State<PharmacyTab> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+
     return Obx(() {
       final isLoading = controller.isLoadingProducts.value;
       final products = _filteredProducts();
       final cart = controller.cart.value;
 
       return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: AppColors.primary,
+          backgroundColor: primaryColor,
           elevation: 0,
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Online Pharmacy',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 18,
+                  fontSize: context.fontSize(18),
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -65,25 +69,25 @@ class _PharmacyTabState extends State<PharmacyTab> {
                     'Online Pharmacy',
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.8),
-                      fontSize: 11,
+                      fontSize: context.fontSize(11),
                     ),
                   ),
                   Icon(Icons.chevron_right,
-                      size: 12, color: Colors.white.withOpacity(0.8)),
+                      size: context.iconSize(12), color: Colors.white.withOpacity(0.8)),
                   Text(
                     'Prescription Drugs',
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.8),
-                      fontSize: 11,
+                      fontSize: context.fontSize(11),
                     ),
                   ),
                   Icon(Icons.chevron_right,
-                      size: 12, color: Colors.white.withOpacity(0.8)),
+                      size: context.iconSize(12), color: Colors.white.withOpacity(0.8)),
                   Text(
                     'Analgesic',
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.8),
-                      fontSize: 11,
+                      fontSize: context.fontSize(11),
                     ),
                   ),
                 ],
@@ -135,69 +139,71 @@ class _PharmacyTabState extends State<PharmacyTab> {
             ),
           ],
         ),
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text(
-                'Analgesic',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1E293B),
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(context.padding(16.0)),
+                child: Text(
+                  'Analgesic',
+                  style: TextStyle(
+                    fontSize: context.fontSize(24),
+                    fontWeight: FontWeight.w700,
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Products (34)',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF64748B),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: context.padding(16.0)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Products (34)',
+                      style: TextStyle(
+                        fontSize: context.fontSize(16),
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => const FilterBottomSheet(),
-                      );
-                    },
-                    icon: const Icon(Icons.tune),
-                    color: const Color(0xFF64748B),
-                  ),
-                ],
+                    IconButton(
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder: (context) => const FilterBottomSheet(),
+                        );
+                      },
+                      icon: const Icon(Icons.tune),
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : products.isEmpty
-                      ? _buildEmptyState()
-                      : GridView.builder(
-                          padding: const EdgeInsets.all(16),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 16,
-                            crossAxisSpacing: 16,
-                            childAspectRatio: 0.7,
+              Expanded(
+                child: isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : products.isEmpty
+                        ? _buildEmptyState()
+                        : GridView.builder(
+                            padding: EdgeInsets.all(context.padding(16)),
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: context.spacing(16),
+                              crossAxisSpacing: context.spacing(16),
+                              childAspectRatio: 0.7,
+                            ),
+                            itemCount: products.length,
+                            itemBuilder: (context, index) {
+                              return _buildProductCard(products[index]);
+                            },
                           ),
-                          itemCount: products.length,
-                          itemBuilder: (context, index) {
-                            return _buildProductCard(products[index]);
-                          },
-                        ),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
         bottomNavigationBar: cart != null && cart.cartItems.isNotEmpty
             ? _buildBottomCartBar(cart.totalAmount, cart.totalItems)
@@ -207,6 +213,8 @@ class _PharmacyTabState extends State<PharmacyTab> {
   }
 
   Widget _buildProductCard(PharmacyProduct product) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
     final qty = controller.getQuantity(product.id);
     final price = product.sellingPrice ?? product.mrp ?? 0;
     final originalPrice = product.mrp ?? price;
@@ -224,9 +232,9 @@ class _PharmacyTabState extends State<PharmacyTab> {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(color: theme.dividerColor),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
@@ -243,7 +251,7 @@ class _PharmacyTabState extends State<PharmacyTab> {
                 Container(
                   height: 120,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAFC),
+                    color: theme.colorScheme.surfaceContainerHighest,
                     borderRadius:
                         const BorderRadius.vertical(top: Radius.circular(12)),
                   ),
@@ -254,16 +262,16 @@ class _PharmacyTabState extends State<PharmacyTab> {
                             product.imageUrl!,
                             height: 80,
                             fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => const Icon(
+                            errorBuilder: (_, __, ___) => Icon(
                               Icons.local_pharmacy,
-                              size: 48,
-                              color: AppColors.primary,
+                              size: context.iconSize(48),
+                              color: primaryColor,
                             ),
                           )
-                        : const Icon(
+                        : Icon(
                             Icons.local_pharmacy,
-                            size: 48,
-                            color: AppColors.primary,
+                            size: context.iconSize(48),
+                            color: primaryColor,
                           ),
                   ),
                 ),
@@ -273,16 +281,16 @@ class _PharmacyTabState extends State<PharmacyTab> {
                     left: 8,
                     child: Container(
                       padding:
-                          const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          EdgeInsets.symmetric(horizontal: context.padding(8), vertical: context.padding(4)),
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
+                        color: primaryColor,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         '-$discount%',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 11,
+                          fontSize: context.fontSize(11),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -292,48 +300,49 @@ class _PharmacyTabState extends State<PharmacyTab> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: EdgeInsets.all(context.padding(12.0)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.star, color: Color(0xFFFBBF24), size: 14),
-                        const SizedBox(width: 4),
-                        const Text(
+                        Icon(Icons.star, color: const Color(0xFFFBBF24), size: context.iconSize(14)),
+                        SizedBox(width: context.spacing(4)),
+                        Text(
                           '4.8',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: context.fontSize(12),
                             fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
-                        const SizedBox(width: 2),
+                        SizedBox(width: context.spacing(2)),
                         Text(
                           '(454)',
                           style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[600],
+                            fontSize: context.fontSize(11),
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: context.spacing(6)),
                     Text(
                       product.productName,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 14,
+                      style: TextStyle(
+                        fontSize: context.fontSize(14),
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF1E293B),
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: context.spacing(4)),
                     Text(
                       '5ml',
                       style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
+                        fontSize: context.fontSize(12),
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const Spacer(),
@@ -341,20 +350,20 @@ class _PharmacyTabState extends State<PharmacyTab> {
                       children: [
                         Text(
                           '₹${price.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: TextStyle(
+                            fontSize: context.fontSize(16),
                             fontWeight: FontWeight.w700,
-                            color: AppColors.primary,
+                            color: primaryColor,
                           ),
                         ),
                         if (discount > 0) ...[
-                          const SizedBox(width: 6),
+                          SizedBox(width: context.spacing(6)),
                           Text(
                             '₹${originalPrice.toStringAsFixed(2)}',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: context.fontSize(11),
                               decoration: TextDecoration.lineThrough,
-                              color: Colors.grey[500],
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
@@ -371,19 +380,20 @@ class _PharmacyTabState extends State<PharmacyTab> {
   }
 
   Widget _buildEmptyState() {
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.local_pharmacy_outlined,
-              size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          const Text(
+              size: context.iconSize(64), color: theme.colorScheme.onSurfaceVariant),
+          SizedBox(height: context.spacing(16)),
+          Text(
             'No products found',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: context.fontSize(18),
               fontWeight: FontWeight.w600,
-              color: Color(0xFF64748B),
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -392,10 +402,12 @@ class _PharmacyTabState extends State<PharmacyTab> {
   }
 
   Widget _buildBottomCartBar(double totalAmount, int totalItems) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(context.padding(16)),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -415,18 +427,18 @@ class _PharmacyTabState extends State<PharmacyTab> {
                 children: [
                   Text(
                     '$totalItems items',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF64748B),
+                    style: TextStyle(
+                      fontSize: context.fontSize(14),
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: context.spacing(4)),
                   Text(
                     'Total: ₹${totalAmount.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: TextStyle(
+                      fontSize: context.fontSize(18),
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF1E293B),
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                 ],
@@ -437,19 +449,19 @@ class _PharmacyTabState extends State<PharmacyTab> {
                 Get.to(() => ShoppingCartPage(controller: controller));
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: primaryColor,
                 foregroundColor: Colors.white,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                    EdgeInsets.symmetric(horizontal: context.padding(32), vertical: context.padding(14)),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 elevation: 0,
               ),
-              child: const Text(
+              child: Text(
                 'View Cart',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: context.fontSize(16),
                   fontWeight: FontWeight.w600,
                 ),
               ),
