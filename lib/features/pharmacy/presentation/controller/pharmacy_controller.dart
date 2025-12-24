@@ -153,7 +153,13 @@ class PharmacyController extends GetxController {
     if (cart.value == null || cart.value!.cartItems.isEmpty) return null;
     isPlacingOrder.value = true;
     try {
-      final payload = <String, dynamic>{};
+      final payload = <String, dynamic>{
+        'shipping_address': '23 Estean, New York City, USA',
+        'billing_address': '23 Estean, New York City, USA',
+        'status': 'pending',
+        'payment_status': 'pending',
+      };
+
       if (notes != null && notes.trim().isNotEmpty) {
         payload['notes'] = notes.trim();
       }
