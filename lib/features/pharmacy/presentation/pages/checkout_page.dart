@@ -4,6 +4,7 @@ import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/app_toast.dart';
 import '../../data/models/cart.dart';
 import '../controller/pharmacy_controller.dart';
+import '../widgets/razorpay_payment_sheet.dart';
 import 'order_success_page.dart';
 
 class CheckoutPage extends StatefulWidget {
@@ -570,16 +571,50 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Future<void> _confirmOrder() async {
+    final cart = widget.controller.cart.value;
+    if (cart == null || cart.cartItems.isEmpty) {
+      AppToast.showError('Cart is empty');
+      return;
+    }
+
+    final totalDeal = cart.totalAmount;
+    final total = totalDeal - voucherDiscount;
+
+    // Show Razorpay payment sheet
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: false,
+      builder: (context) => RazorpayPaymentSheet(
+        amount: total,
+        orderId: DateTime.now().millisecondsSinceEpoch.toString(),
+        onSuccess: () => _handlePaymentSuccess(),
+        onFailure: () => _handlePaymentFailure(),
+      ),
+    );
+  }
+
+  Future<void> _handlePaymentSuccess() async {
+    // Payment successful, create the order
     final order = await widget.controller.checkout(
       notes: notesCtrl.text,
       voucherCode: 'MEDIXPERT',
     );
+
     if (order == null) {
       if (widget.controller.error.value.isNotEmpty) {
         AppToast.showError(widget.controller.error.value);
       }
       return;
     }
+
+    // Navigate to success page
     Get.off(() => OrderSuccessPage(order: order));
+  }
+
+  void _handlePaymentFailure() {
+    // Payment failed
+    AppToast.showError('Payment failed. Please try again.');
   }
 }
