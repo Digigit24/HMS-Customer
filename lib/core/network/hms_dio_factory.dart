@@ -2,23 +2,24 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import '../storage/token_storage.dart';
+import '../config/app_config.dart';
 
 class HmsDioFactory {
   HmsDioFactory._();
 
-  static Dio create({required String baseUrl}) {
+  static Dio create({String? baseUrl}) {
     final dio = Dio(BaseOptions(
-      baseUrl: baseUrl, // バ. should be https://hms.celiyo.com
-      connectTimeout: const Duration(seconds: 30),
-      receiveTimeout: const Duration(seconds: 30),
+      baseUrl: baseUrl ?? AppConfig.baseUrl,
+      connectTimeout: AppConfig.connectTimeout,
+      receiveTimeout: AppConfig.receiveTimeout,
       headers: {
         'Content-Type': 'application/json',
         'accept': 'application/json, text/plain, */*',
         'accept-encoding': 'gzip, deflate, br, zstd',
         'accept-language': 'en-US,en;q=0.9',
         'connection': 'keep-alive',
-        'origin': 'https://admin.gorehospital.com',
-        'referer': 'https://admin.gorehospital.com/',
+        'origin': AppConfig.appOrigin,
+        'referer': AppConfig.appReferer,
         'sec-fetch-dest': 'empty',
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'cross-site',
@@ -78,10 +79,8 @@ class HmsDioFactory {
         options.headers.putIfAbsent(
             'accept-language', () => 'en-US,en;q=0.9');
         options.headers.putIfAbsent('connection', () => 'keep-alive');
-        options.headers.putIfAbsent(
-            'origin', () => 'https://admin.gorehospital.com');
-        options.headers.putIfAbsent(
-            'referer', () => 'https://admin.gorehospital.com/');
+        options.headers.putIfAbsent('origin', () => AppConfig.appOrigin);
+        options.headers.putIfAbsent('referer', () => AppConfig.appReferer);
         options.headers.putIfAbsent('sec-fetch-dest', () => 'empty');
         options.headers.putIfAbsent('sec-fetch-mode', () => 'cors');
         options.headers.putIfAbsent('sec-fetch-site', () => 'cross-site');

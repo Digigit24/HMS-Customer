@@ -29,7 +29,7 @@ class _PharmacyTabState extends State<PharmacyTab> {
     controller = Get.put(
       PharmacyController(
         repo: PharmacyRepository(
-          dio: HmsDioFactory.create(baseUrl: 'https://hms.celiyo.com'),
+          dio: HmsDioFactory.create(),
         ),
       ),
       permanent: true,
