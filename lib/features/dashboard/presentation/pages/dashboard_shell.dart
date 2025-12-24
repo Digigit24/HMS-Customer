@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import '../../../../core/widgets/app_bottom_nav.dart';
 import '../controller/dashboard_controller.dart';
 import 'appointments_tab.dart';
-import 'chat_tab.dart';
 import 'home_tab.dart';
 import 'pharmacy_tab.dart';
 import 'settings_tab.dart';
@@ -22,7 +21,6 @@ class DashboardShell extends StatelessWidget {
       HomeTab(),
       AppointmentsTab(),
       PharmacyTab(),
-      ChatTab(),
       SettingsTab(),
     ];
 
@@ -33,24 +31,19 @@ class DashboardShell extends StatelessWidget {
         activeIcon: Icons.home,
       ),
       AppBottomNavItem(
-        label: 'Calendar',
+        label: 'Appointments',
         icon: Icons.event_note_outlined,
         activeIcon: Icons.event_note,
       ),
       AppBottomNavItem(
-        label: 'History',
-        icon: Icons.receipt_long_outlined,
-        activeIcon: Icons.receipt_long,
+        label: 'Pharmacy',
+        icon: Icons.local_pharmacy_outlined,
+        activeIcon: Icons.local_pharmacy,
       ),
       AppBottomNavItem(
-        label: 'Chat',
-        icon: Icons.chat_bubble_outline,
-        activeIcon: Icons.chat_bubble,
-      ),
-      AppBottomNavItem(
-        label: 'Account',
-        icon: Icons.person_outline,
-        activeIcon: Icons.person,
+        label: 'Settings',
+        icon: Icons.settings_outlined,
+        activeIcon: Icons.settings,
       ),
     ];
 
@@ -58,32 +51,11 @@ class DashboardShell extends StatelessWidget {
       final index = c.currentIndex.value;
 
       return Scaffold(
-        // Only show AppBar for non-home tabs
-        appBar: index == 0
-            ? null
-            : AppBar(
-                title: Text(navItems[index].label),
-              ),
-
         // Keeps tab state alive. No full refresh.
         body: IndexedStack(
           index: index,
           children: tabs,
         ),
-
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            // Navigate to book appointment screen
-            Get.toNamed('/book-appointment');
-          },
-          backgroundColor: const Color(0xFF2196F3),
-          child: const Icon(
-            Icons.add,
-            color: Colors.white,
-            size: 32,
-          ),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
         bottomNavigationBar: AppBottomNav(
           currentIndex: index,

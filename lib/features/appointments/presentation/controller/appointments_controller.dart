@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import '../../../../core/network/api_exceptions.dart';
+import '../../../../core/utils/app_toast.dart';
 import '../../data/models/appointment.dart';
+import '../../data/models/doctor.dart';
 import '../../data/repositories/appointment_repository.dart';
 
 class AppointmentsController extends GetxController {
@@ -13,6 +15,8 @@ class AppointmentsController extends GetxController {
   final todayAppointments = <Appointment>[].obs;
   final upcomingAppointments = <Appointment>[].obs;
   final statistics = <String, dynamic>{}.obs;
+  final doctors = <Doctor>[].obs;
+  final isLoadingDoctors = false.obs;
 
   Future<void> loadAppointments() async {
     isLoading.value = true;
@@ -22,6 +26,7 @@ class AppointmentsController extends GetxController {
       appointments.assignAll(list);
     } on ApiException catch (e) {
       error.value = e.message;
+      AppToast.showError(e.message);
     } finally {
       isLoading.value = false;
     }
@@ -33,6 +38,7 @@ class AppointmentsController extends GetxController {
       todayAppointments.assignAll(list);
     } on ApiException catch (e) {
       error.value = e.message;
+      AppToast.showError(e.message);
     }
   }
 
@@ -42,6 +48,7 @@ class AppointmentsController extends GetxController {
       upcomingAppointments.assignAll(list);
     } on ApiException catch (e) {
       error.value = e.message;
+      AppToast.showError(e.message);
     }
   }
 
@@ -51,6 +58,20 @@ class AppointmentsController extends GetxController {
       statistics.assignAll(stats);
     } on ApiException catch (e) {
       error.value = e.message;
+      AppToast.showError(e.message);
+    }
+  }
+
+  Future<void> loadDoctors() async {
+    isLoadingDoctors.value = true;
+    try {
+      final list = await repo.fetchDoctors();
+      doctors.assignAll(list);
+    } on ApiException catch (e) {
+      error.value = e.message;
+      AppToast.showError(e.message);
+    } finally {
+      isLoadingDoctors.value = false;
     }
   }
 
@@ -59,6 +80,7 @@ class AppointmentsController extends GetxController {
       return await repo.getById(id.toString());
     } on ApiException catch (e) {
       error.value = e.message;
+      AppToast.showError(e.message);
       return null;
     }
   }
@@ -67,14 +89,11 @@ class AppointmentsController extends GetxController {
     try {
       await repo.create(payload);
       await loadAppointments(); // Refresh list
+      AppToast.showSuccess('Appointment created');
       return true;
     } on ApiException catch (e) {
       error.value = e.message;
-      Get.snackbar(
-        'Error',
-        e.message,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppToast.showError(e.message);
       return false;
     }
   }
@@ -83,14 +102,11 @@ class AppointmentsController extends GetxController {
     try {
       await repo.update(id.toString(), payload);
       await loadAppointments(); // Refresh list
+      AppToast.showSuccess('Appointment updated');
       return true;
     } on ApiException catch (e) {
       error.value = e.message;
-      Get.snackbar(
-        'Error',
-        e.message,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppToast.showError(e.message);
       return false;
     }
   }
@@ -99,19 +115,11 @@ class AppointmentsController extends GetxController {
     try {
       await repo.cancel(id.toString());
       await loadAppointments(); // Refresh list
-      Get.snackbar(
-        'Success',
-        'Appointment cancelled successfully',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppToast.showSuccess('Appointment cancelled successfully');
       return true;
     } on ApiException catch (e) {
       error.value = e.message;
-      Get.snackbar(
-        'Error',
-        e.message,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppToast.showError(e.message);
       return false;
     }
   }
@@ -120,19 +128,11 @@ class AppointmentsController extends GetxController {
     try {
       await repo.checkIn(id.toString());
       await loadAppointments(); // Refresh list
-      Get.snackbar(
-        'Success',
-        'Checked in successfully',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppToast.showSuccess('Checked in successfully');
       return true;
     } on ApiException catch (e) {
       error.value = e.message;
-      Get.snackbar(
-        'Error',
-        e.message,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppToast.showError(e.message);
       return false;
     }
   }
@@ -141,19 +141,11 @@ class AppointmentsController extends GetxController {
     try {
       await repo.start(id.toString());
       await loadAppointments(); // Refresh list
-      Get.snackbar(
-        'Success',
-        'Appointment started',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppToast.showSuccess('Appointment started');
       return true;
     } on ApiException catch (e) {
       error.value = e.message;
-      Get.snackbar(
-        'Error',
-        e.message,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppToast.showError(e.message);
       return false;
     }
   }
@@ -162,19 +154,11 @@ class AppointmentsController extends GetxController {
     try {
       await repo.complete(id.toString());
       await loadAppointments(); // Refresh list
-      Get.snackbar(
-        'Success',
-        'Appointment completed',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppToast.showSuccess('Appointment completed');
       return true;
     } on ApiException catch (e) {
       error.value = e.message;
-      Get.snackbar(
-        'Error',
-        e.message,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppToast.showError(e.message);
       return false;
     }
   }

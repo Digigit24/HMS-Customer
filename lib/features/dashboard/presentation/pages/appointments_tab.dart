@@ -6,139 +6,645 @@ import '../../../appointments/data/repositories/appointment_repository.dart';
 import '../../../appointments/presentation/controller/appointments_controller.dart';
 import '../../../../core/network/hms_dio_factory.dart';
 import '../../../../core/utils/app_colors.dart';
+import '../../../../core/storage/token_storage.dart';
 import '../../../appointments/presentation/pages/appointment_detail_page.dart';
+import '../../../appointments/data/models/doctor.dart';
 
-class AppointmentsTab extends StatelessWidget {
+class AppointmentsTab extends StatefulWidget {
   const AppointmentsTab({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // ✅ Inject controller once
-    final controller = Get.put(
+  State<AppointmentsTab> createState() => _AppointmentsTabState();
+}
+
+class _AppointmentsTabState extends State<AppointmentsTab> {
+  late final AppointmentsController controller;
+  late DateTime selectedDate;
+  String? selectedTime;
+  Doctor? selectedDoctor;
+  String priority = 'normal';
+  String? currentUserId;
+
+  final List<String> morningSlots = const [
+    '09:00',
+    '10:00',
+    '11:00',
+    '12:00',
+    '13:00',
+  ];
+
+  final List<String> afternoonSlots = const [
+    '15:00',
+    '16:00',
+    '17:00',
+    '18:00',
+    '19:00',
+    '20:00',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    selectedDate = DateTime.now();
+    controller = Get.put(
       AppointmentsController(
         repo: AppointmentRepository(
           dio: HmsDioFactory.create(baseUrl: 'https://hms.celiyo.com'),
         ),
       ),
-      permanent: false,
+      permanent: true,
     );
 
-    // load once when tab opens
     if (controller.appointments.isEmpty && !controller.isLoading.value) {
       Future.microtask(() => controller.loadAppointments());
     }
+    Future.microtask(() => controller.loadDoctors());
+    _loadCurrentUser();
+  }
 
-    return Obx(() {
-      if (controller.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
-      }
+  Widget _buildDoctorPicker(void Function(void Function()) setModalState) {
+    final theme = Theme.of(context);
+    final doctors = controller.doctors;
 
-      if (controller.error.value.isNotEmpty) {
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  controller.error.value,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Doctor *',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: () async {
+            if (controller.isLoadingDoctors.value) return;
+            final picked = await showModalBottomSheet<Doctor>(
+              context: context,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              builder: (ctx) {
+                return SafeArea(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 12),
+                      Container(
+                        height: 4,
+                        width: 42,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: const [
+                            Text(
+                              'Select Doctor',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (controller.isLoadingDoctors.value)
+                        const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: CircularProgressIndicator(),
+                        )
+                      else if (doctors.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Text('No doctors available'),
+                        )
+                      else
+                        Flexible(
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            itemCount: doctors.length,
+                            separatorBuilder: (_, __) =>
+                                const Divider(height: 1),
+                            itemBuilder: (context, index) {
+                              final doc = doctors[index];
+                              return ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor:
+                                      AppColors.primary.withOpacity(0.1),
+                                  child: Text(
+                                    doc.name.isNotEmpty
+                                        ? doc.name[0].toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                title: Text(doc.name),
+                                subtitle: doc.specialty != null
+                                    ? Text(doc.specialty!)
+                                    : null,
+                                onTap: () => Navigator.of(context).pop(doc),
+                              );
+                            },
+                          ),
+                        ),
+                    ],
                   ),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: controller.loadAppointments,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 12,
+                );
+              },
+            );
+
+            if (picked != null) {
+              setModalState(() {
+                selectedDoctor = picked;
+              });
+            }
+          },
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            decoration: BoxDecoration(
+              color: theme.inputDecorationTheme.fillColor ??
+                  theme.cardColor.withOpacity(0.6),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: theme.dividerColor,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.person_outline, color: AppColors.primary),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    selectedDoctor?.name ?? 'Select doctor',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: selectedDoctor == null
+                          ? theme.hintColor
+                          : theme.colorScheme.onSurface,
                     ),
                   ),
-                  child: const Text('Retry'),
                 ),
+                const Icon(Icons.keyboard_arrow_down),
               ],
             ),
           ),
-        );
-      }
-
-      if (controller.appointments.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.calendar_today_outlined,
-                size: 80,
-                color: Colors.grey[300],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'No appointments yet',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Book your first appointment',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[500],
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Get.toNamed('/book-appointment');
-                },
-                icon: const Icon(Icons.add),
-                label: const Text('Book Appointment'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      }
-
-      return RefreshIndicator(
-        onRefresh: controller.refreshList,
-        child: ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: controller.appointments.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 16),
-          itemBuilder: (_, i) {
-            final appt = controller.appointments[i];
-            return _buildAppointmentCard(appt);
-          },
         ),
+      ],
+    );
+  }
+
+  Widget _buildPriorityDropdown(void Function(void Function()) setModalState) {
+    final theme = Theme.of(context);
+    const options = [
+      {'value': 'low', 'label': 'Low'},
+      {'value': 'normal', 'label': 'Normal'},
+      {'value': 'high', 'label': 'High'},
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Priority',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: theme.inputDecorationTheme.fillColor ??
+                theme.cardColor.withOpacity(0.6),
+            border: Border.all(color: theme.dividerColor),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: priority,
+              isExpanded: true,
+              icon: const Icon(Icons.keyboard_arrow_down),
+              items: options
+                  .map(
+                    (o) => DropdownMenuItem<String>(
+                      value: o['value']!,
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 10,
+                            height: 10,
+                            margin: const EdgeInsets.only(right: 8),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: o['value'] == 'high'
+                                  ? Colors.red
+                                  : o['value'] == 'normal'
+                                      ? Colors.orange
+                                      : Colors.green,
+                            ),
+                          ),
+                          Text(
+                            o['label']!,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (v) {
+                if (v != null) {
+                  setModalState(() {
+                    priority = v;
+                  });
+                }
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _loadCurrentUser() async {
+    final id = await TokenStorage.instance.getUserId();
+    if (mounted) {
+      setState(() {
+        currentUserId = id;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Obx(() {
+      final isLoading = controller.isLoading.value;
+      final hasError = controller.error.value.isNotEmpty;
+      final isEmpty = controller.appointments.isEmpty;
+
+      return Column(
+        children: [
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: controller.refreshList,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  _buildHeader(theme),
+                  const SizedBox(height: 16),
+                  _buildDateSelector(),
+                  const SizedBox(height: 12),
+                  _buildSlotSection('Morning Set', morningSlots),
+                  const SizedBox(height: 12),
+                  _buildSlotSection('Afternoon Set', afternoonSlots),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () => _openCreateSheet(
+                      context,
+                      prefillDate: selectedDate,
+                      prefillTime: selectedTime,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size.fromHeight(52),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Add Appointment',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Your Appointments',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  if (isLoading)
+                    const Center(child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: CircularProgressIndicator(),
+                    )),
+                  if (hasError) _buildErrorState(),
+                  if (!isLoading && !hasError && isEmpty) _buildEmptyState(),
+                  if (!isLoading && !hasError && !isEmpty)
+                    ...List.generate(
+                      controller.appointments.length,
+                      (i) => Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: _buildAppointmentCard(
+                          controller.appointments[i],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
       );
     });
+  }
+
+  Widget _buildHeader(ThemeData theme) {
+    final month = DateFormat('MMM yyyy').format(selectedDate);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            IconButton(
+              onPressed: () {
+                // optional: navigate back if needed
+              },
+              icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Make Appointment',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.calendar_month_outlined),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Select your visit date & Time',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'You can choose the date and time from the available doctor\'s schedule',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            height: 1.4,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'Choose Day, $month',
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateSelector() {
+    final days = List.generate(7, (i) => selectedDate.add(Duration(days: i)));
+    final theme = Theme.of(context);
+    final cardColor = theme.cardColor;
+    final selectedText = theme.colorScheme.onPrimary;
+    final unselectedText = theme.colorScheme.onSurfaceVariant;
+    final unselectedBg = theme.colorScheme.surfaceVariant;
+
+    return SizedBox(
+      height: 86,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: days.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (context, index) {
+          final day = days[index];
+          final isSelected = _isSameDay(day, selectedDate);
+          final dayName = DateFormat('E').format(day);
+          final dayNum = DateFormat('d').format(day);
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedDate = day;
+              });
+            },
+            child: Container(
+              width: 68,
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primary : unselectedBg,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    dayName,
+                    style: TextStyle(
+                      color: isSelected ? selectedText : unselectedText,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    dayNum,
+                    style: TextStyle(
+                      color: isSelected ? selectedText : theme.colorScheme.onSurface,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildSlotSection(String title, List<String> slots) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 15,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: slots.map((slot) {
+            final isSelected = slot == selectedTime;
+            final isDisabled = false; // hook to disable if needed
+            return ChoiceChip(
+              label: Text(slot),
+              selected: isSelected,
+              onSelected: isDisabled
+                  ? null
+                  : (v) {
+                      setState(() {
+                        selectedTime = slot;
+                      });
+                    },
+              selectedColor: AppColors.primary,
+              labelStyle: TextStyle(
+                color: isSelected
+                    ? Colors.white
+                    : theme.colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+              backgroundColor:
+                  isDisabled ? theme.disabledColor.withOpacity(0.2) : theme.cardColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: isSelected
+                      ? AppColors.primary
+                      : theme.dividerColor,
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              controller.error.value,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: controller.loadAppointments,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 12,
+                ),
+              ),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.calendar_today_outlined,
+                size: 58,
+                color: AppColors.primary,
+              ),
+            ),
+            const SizedBox(height: 18),
+            const Text(
+              'No appointments yet',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Book or create a new appointment to see it here.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                OutlinedButton(
+                  onPressed: () => Get.toNamed('/book-appointment'),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.primary),
+                  ),
+                  child: const Text('Book'),
+                ),
+                const SizedBox(width: 12),
+                ElevatedButton.icon(
+                  onPressed: () => _openCreateSheet(context),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Create'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildAppointmentCard(appointment) {
     final statusColor = _getStatusColor(appointment.status);
     final statusIcon = _getStatusIcon(appointment.status);
+    final theme = Theme.of(context);
+    final cardColor = theme.cardColor;
+    final borderColor = theme.dividerColor.withOpacity(0.4);
+    final textColor = theme.colorScheme.onSurface;
+    final muted = theme.colorScheme.onSurfaceVariant;
 
     return GestureDetector(
       onTap: () {
@@ -146,10 +652,10 @@ class AppointmentsTab extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cardColor,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.grey[200]!,
+            color: borderColor,
             width: 1,
           ),
           boxShadow: [
@@ -163,7 +669,6 @@ class AppointmentsTab extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Doctor Info Section
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -198,10 +703,10 @@ class AppointmentsTab extends StatelessWidget {
                       children: [
                         Text(
                           appointment.doctorName ?? 'Doctor',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: textColor,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -209,7 +714,7 @@ class AppointmentsTab extends StatelessWidget {
                           appointment.doctorSpecialty ?? 'Specialist',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[600],
+                            color: muted,
                           ),
                         ),
                       ],
@@ -245,11 +750,8 @@ class AppointmentsTab extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Divider
             Divider(height: 1, color: Colors.grey[200]),
-
-            // Date & Time Section
+            Divider(height: 1, color: borderColor),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
@@ -273,13 +775,13 @@ class AppointmentsTab extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Date',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                              ),
-                            ),
+                        Text(
+                          'Date',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: muted,
+                          ),
+                        ),
                             const SizedBox(height: 2),
                             Text(
                               appointment.appointmentDate != null
@@ -287,10 +789,10 @@ class AppointmentsTab extends StatelessWidget {
                                       DateTime.parse(
                                           appointment.appointmentDate!))
                                   : 'N/A',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.black87,
+                                color: textColor,
                               ),
                             ),
                           ],
@@ -318,20 +820,20 @@ class AppointmentsTab extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Time',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                              ),
-                            ),
+                        Text(
+                          'Time',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: muted,
+                          ),
+                        ),
                             const SizedBox(height: 2),
                             Text(
                               appointment.appointmentTime ?? 'N/A',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.black87,
+                                color: textColor,
                               ),
                             ),
                           ],
@@ -345,6 +847,273 @@ class AppointmentsTab extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _openCreateSheet(
+    BuildContext context, {
+    DateTime? prefillDate,
+    String? prefillTime,
+  }) {
+    final complaintCtrl = TextEditingController();
+    final notesCtrl = TextEditingController();
+    final appointmentTypeIdCtrl = TextEditingController();
+    DateTime? selectedDateLocal = prefillDate ?? DateTime.now();
+    TimeOfDay? selectedTimeLocal = prefillTime != null
+        ? TimeOfDay(
+            hour: int.parse(prefillTime.split(':')[0]),
+            minute: int.parse(prefillTime.split(':')[1]),
+          )
+        : null;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        final mediaQuery = MediaQuery.of(ctx);
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.7,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          builder: (sheetContext, scrollController) {
+            return Padding(
+              padding: EdgeInsets.only(bottom: mediaQuery.viewInsets.bottom),
+              child: StatefulBuilder(
+                builder: (context, setModalState) {
+                  Future<void> pickDate() async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: selectedDateLocal ?? DateTime.now(),
+                      firstDate:
+                          DateTime.now().subtract(const Duration(days: 0)),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
+                    );
+                    if (picked != null) {
+                      setModalState(() {
+                        selectedDateLocal = picked;
+                      });
+                    }
+                  }
+
+                  Future<void> pickTime() async {
+                    final picked = await showTimePicker(
+                      context: context,
+                      initialTime: selectedTimeLocal ?? TimeOfDay.now(),
+                    );
+                    if (picked != null) {
+                      setModalState(() {
+                        selectedTimeLocal = picked;
+                      });
+                    }
+                  }
+
+                  Future<void> submit() async {
+                    if (selectedDateLocal == null ||
+                        selectedTimeLocal == null) {
+                      Get.snackbar(
+                        'Missing info',
+                        'Select both date and time',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                      return;
+                    }
+
+                    int? parseInt(String v) {
+                      if (v.trim().isEmpty) return null;
+                      return int.tryParse(v.trim());
+                    }
+
+                    final doctorId = selectedDoctor?.id;
+                    final appointmentTypeId =
+                        parseInt(appointmentTypeIdCtrl.text);
+
+                    final patientIdValue =
+                        currentUserId == null || currentUserId!.isEmpty
+                            ? null
+                            : (int.tryParse(currentUserId!) ?? currentUserId);
+
+                    if (patientIdValue == null || doctorId == null) {
+                      Get.snackbar(
+                        'Missing info',
+                        'Patient (current user) and Doctor are required',
+                        snackPosition: SnackPosition.BOTTOM,
+                      );
+                      return;
+                    }
+
+                    final dateStr =
+                        DateFormat('yyyy-MM-dd').format(selectedDateLocal!);
+                    final timeStr =
+                        '${selectedTimeLocal!.hour.toString().padLeft(2, '0')}:${selectedTimeLocal!.minute.toString().padLeft(2, '0')}:00';
+
+                    final complaint = complaintCtrl.text.trim().isEmpty
+                        ? 'General consultation'
+                        : complaintCtrl.text.trim();
+                    final notes = notesCtrl.text.trim();
+
+                    final payload = <String, dynamic>{
+                      'appointment_date': dateStr,
+                      'appointment_time': timeStr,
+                      'status': 'scheduled',
+                      'priority': priority,
+                      'patient_id': patientIdValue,
+                      'doctor_id': doctorId,
+                      if (appointmentTypeId != null)
+                        'appointment_type_id': appointmentTypeId,
+                      'chief_complaint': complaint,
+                    };
+
+                    if (notes.isNotEmpty) {
+                      payload['notes'] = notes;
+                    }
+
+                    final ok = await controller.createAppointment(payload);
+                    if (ok && mounted) {
+                      Navigator.of(context).pop();
+                    }
+                  }
+
+                  final theme = Theme.of(context);
+                  return Material(
+                    color: theme.scaffoldBackgroundColor,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 16),
+                      child: SingleChildScrollView(
+                        controller: scrollController,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Center(
+                              child: Container(
+                                width: 40,
+                                height: 4,
+                                margin: const EdgeInsets.only(bottom: 12),
+                                decoration: BoxDecoration(
+                                  color: theme.dividerColor,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'New Appointment',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                IconButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(),
+                                  icon: const Icon(Icons.close),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Pick date & time',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: pickDate,
+                                    icon: const Icon(Icons.calendar_today),
+                                    label: Text(
+                                      selectedDateLocal != null
+                                          ? DateFormat('MMM dd, yyyy')
+                                              .format(selectedDateLocal!)
+                                          : 'Select date',
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: pickTime,
+                                    icon: const Icon(Icons.access_time),
+                                    label: Text(
+                                      selectedTimeLocal != null
+                                          ? selectedTimeLocal!.format(context)
+                                          : 'Select time',
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            _buildDoctorPicker(setModalState),
+                            const SizedBox(height: 12),
+                            TextField(
+                              controller: appointmentTypeIdCtrl,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: 'Appointment Type ID (optional)',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            _buildPriorityDropdown(setModalState),
+                            const SizedBox(height: 12),
+                            TextField(
+                              controller: complaintCtrl,
+                              decoration: const InputDecoration(
+                                labelText: 'Chief complaint',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            TextField(
+                              controller: notesCtrl,
+                              maxLines: 3,
+                              decoration: const InputDecoration(
+                                labelText: 'Notes (optional)',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: submit,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
+                                ),
+                                child: const Text(
+                                  'Create Appointment',
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -382,5 +1151,9 @@ class AppointmentsTab extends StatelessWidget {
     return status.split('_').map((word) {
       return word[0].toUpperCase() + word.substring(1);
     }).join(' ');
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
   }
 }

@@ -36,6 +36,10 @@ class AuthController extends GetxController {
       await TokenStorage.instance.saveTokens(
         accessToken: res.access,
         refreshToken: res.refresh,
+        tenantId: res.tenantId,
+        tenantSlug: res.tenantSlug,
+        tenantToken: res.tenantToken,
+        userId: res.userId,
       );
 
       Get.offAllNamed('/dashboard');

@@ -9,13 +9,17 @@ import 'core/features/auth/presentation/pages/dashboard_page.dart';
 import 'core/features/auth/presentation/pages/login_page.dart';
 import 'core/features/auth/presentation/pages/splash_page.dart';
 import 'core/network/dio_factory.dart';
+import 'core/storage/token_storage.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_constants.dart';
 import 'core/theme/theme_controller.dart';
 import 'features/dashboard/presentation/pages/dashboard_shell.dart';
 import 'features/appointments/presentation/pages/book_appointment_page.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await TokenStorage.instance.preload();
+
   final authDio = DioFactory.createAuthDio();
   final authRepo = AuthRepository(authDio: authDio);
 
