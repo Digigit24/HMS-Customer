@@ -18,6 +18,7 @@ class CheckoutPage extends StatefulWidget {
 class _CheckoutPageState extends State<CheckoutPage> {
   final notesCtrl = TextEditingController();
   final double voucherDiscount = 50.0;
+  String selectedPaymentMethod = 'razorpay'; // 'razorpay' or 'cod'
 
   @override
   void initState() {
@@ -337,45 +338,56 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Widget _buildPaymentSection() {
+    final paymentLabel = selectedPaymentMethod == 'razorpay'
+        ? 'Pay Online with Razorpay'
+        : 'Cash on Delivery (COD)';
+    final paymentIcon = selectedPaymentMethod == 'razorpay'
+        ? Icons.payment
+        : Icons.money;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.payment, color: AppColors.primary, size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'Payment',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF64748B),
-                      fontWeight: FontWeight.w500,
+      child: InkWell(
+        onTap: _showPaymentMethodSelector,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Row(
+            children: [
+              Icon(paymentIcon, color: AppColors.primary, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Payment Method',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF64748B),
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 2),
-                  Text(
-                    'Payment on delivery cod',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1E293B),
+                    const SizedBox(height: 2),
+                    Text(
+                      paymentLabel,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1E293B),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const Icon(Icons.chevron_right, color: Color(0xFF94A3B8), size: 20),
-          ],
+              const Icon(Icons.chevron_right, color: Color(0xFF94A3B8), size: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -570,6 +582,139 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
+  void _showPaymentMethodSelector() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Select Payment Method',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1E293B),
+              ),
+            ),
+            const SizedBox(height: 20),
+            _buildPaymentOption(
+              'razorpay',
+              'Pay Online with Razorpay',
+              'UPI, Card, Net Banking, Wallets',
+              Icons.payment,
+            ),
+            const SizedBox(height: 12),
+            _buildPaymentOption(
+              'cod',
+              'Cash on Delivery',
+              'Pay when you receive the order',
+              Icons.money,
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentOption(
+    String value,
+    String title,
+    String subtitle,
+    IconData icon,
+  ) {
+    final isSelected = selectedPaymentMethod == value;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          selectedPaymentMethod = value;
+        });
+        Navigator.pop(context);
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primary.withOpacity(0.08)
+              : Colors.grey[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : const Color(0xFFE2E8F0),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.primary.withOpacity(0.1)
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: isSelected ? AppColors.primary : const Color(0xFF64748B),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected
+                          ? AppColors.primary
+                          : const Color(0xFF1E293B),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              const Icon(
+                Icons.check_circle,
+                color: AppColors.primary,
+                size: 24,
+              )
+            else
+              Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.grey[400]!, width: 2),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> _confirmOrder() async {
     final cart = widget.controller.cart.value;
     if (cart == null || cart.cartItems.isEmpty) {
@@ -580,19 +725,25 @@ class _CheckoutPageState extends State<CheckoutPage> {
     final totalDeal = cart.totalAmount;
     final total = totalDeal - voucherDiscount;
 
-    // Show Razorpay payment sheet
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      isDismissible: false,
-      builder: (context) => RazorpayPaymentSheet(
-        amount: total,
-        orderId: DateTime.now().millisecondsSinceEpoch.toString(),
-        onSuccess: () => _handlePaymentSuccess(),
-        onFailure: () => _handlePaymentFailure(),
-      ),
-    );
+    // Check payment method
+    if (selectedPaymentMethod == 'razorpay') {
+      // Show Razorpay payment sheet for online payment
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        isDismissible: false,
+        builder: (context) => RazorpayPaymentSheet(
+          amount: total,
+          orderId: DateTime.now().millisecondsSinceEpoch.toString(),
+          onSuccess: () => _handlePaymentSuccess(),
+          onFailure: () => _handlePaymentFailure(),
+        ),
+      );
+    } else {
+      // Cash on Delivery - create order directly
+      _handlePaymentSuccess();
+    }
   }
 
   Future<void> _handlePaymentSuccess() async {
