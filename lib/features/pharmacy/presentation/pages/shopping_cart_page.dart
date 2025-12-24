@@ -17,7 +17,10 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   @override
   void initState() {
     super.initState();
-    widget.controller.loadCart();
+    // Load cart after build completes to avoid setState during build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.controller.loadCart();
+    });
   }
 
   @override
