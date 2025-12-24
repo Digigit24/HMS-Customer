@@ -8,6 +8,7 @@ import '../../../pharmacy/data/repositories/pharmacy_repository.dart';
 import '../../../pharmacy/data/models/product.dart';
 import '../../../pharmacy/presentation/controller/pharmacy_controller.dart';
 import '../../../pharmacy/presentation/pages/shopping_cart_page.dart';
+import '../../../pharmacy/presentation/pages/product_detail_page.dart';
 import '../../../pharmacy/presentation/widgets/filter_bottom_sheet.dart';
 
 class PharmacyTab extends StatefulWidget {
@@ -213,149 +214,158 @@ class _PharmacyTabState extends State<PharmacyTab> {
         ? ((originalPrice - price) / originalPrice * 100).round()
         : 0;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              Container(
-                height: 120,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(12)),
-                ),
-                child: Center(
-                  child: product.imageUrl != null &&
-                          product.imageUrl!.isNotEmpty
-                      ? Image.network(
-                          product.imageUrl!,
-                          height: 80,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => const Icon(
+    return InkWell(
+      onTap: () {
+        Get.to(() => ProductDetailPage(
+          product: product,
+          controller: controller,
+        ));
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(12)),
+                  ),
+                  child: Center(
+                    child: product.imageUrl != null &&
+                            product.imageUrl!.isNotEmpty
+                        ? Image.network(
+                            product.imageUrl!,
+                            height: 80,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.local_pharmacy,
+                              size: 48,
+                              color: AppColors.primary,
+                            ),
+                          )
+                        : const Icon(
                             Icons.local_pharmacy,
                             size: 48,
                             color: AppColors.primary,
                           ),
-                        )
-                      : const Icon(
-                          Icons.local_pharmacy,
-                          size: 48,
-                          color: AppColors.primary,
-                        ),
-                ),
-              ),
-              if (discount > 0)
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '-$discount%',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
                   ),
                 ),
-            ],
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Color(0xFFFBBF24), size: 14),
-                      const SizedBox(width: 4),
-                      const Text(
-                        '4.8',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
+                if (discount > 0)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      const SizedBox(width: 2),
-                      Text(
-                        '(454)',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    product.productName,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1E293B),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '5ml',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  const Spacer(),
-                  Row(
-                    children: [
-                      Text(
-                        '\$${price.toStringAsFixed(2)}',
+                      child: Text(
+                        '-$discount%',
                         style: const TextStyle(
-                          fontSize: 16,
+                          color: Colors.white,
+                          fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.primary,
                         ),
                       ),
-                      if (discount > 0) ...[
-                        const SizedBox(width: 6),
+                    ),
+                  ),
+              ],
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.star, color: Color(0xFFFBBF24), size: 14),
+                        const SizedBox(width: 4),
+                        const Text(
+                          '4.8',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 2),
                         Text(
-                          '\$${originalPrice.toStringAsFixed(2)}',
+                          '(454)',
                           style: TextStyle(
                             fontSize: 11,
-                            decoration: TextDecoration.lineThrough,
-                            color: Colors.grey[500],
+                            color: Colors.grey[600],
                           ),
                         ),
                       ],
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      product.productName,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1E293B),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '5ml',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        Text(
+                          '\$${price.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        if (discount > 0) ...[
+                          const SizedBox(width: 6),
+                          Text(
+                            '\$${originalPrice.toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              decoration: TextDecoration.lineThrough,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
