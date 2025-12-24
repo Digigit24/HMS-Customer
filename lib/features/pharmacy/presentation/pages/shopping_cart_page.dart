@@ -22,7 +22,6 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -73,14 +72,14 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
           return const Center(child: CircularProgressIndicator());
         }
         if (cart == null || cart.cartItems.isEmpty) {
-          return _buildEmptyState(theme);
+          return _buildEmptyState();
         }
-        return _buildContent(theme, cart);
+        return _buildContent(cart);
       }),
     );
   }
 
-  Widget _buildContent(ThemeData theme, PharmacyCart cart) {
+  Widget _buildContent(PharmacyCart cart) {
     return Column(
       children: [
         Expanded(
@@ -89,15 +88,15 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 16),
-                _buildAddressSection(theme),
+                _buildAddressSection(),
                 const SizedBox(height: 24),
                 ...cart.cartItems.map((item) => Padding(
                       padding: const EdgeInsets.only(bottom: 16, left: 16, right: 16),
-                      child: _buildCartItem(theme, item),
+                      child: _buildCartItem(item),
                     )),
                 const SizedBox(height: 8),
-                _buildVoucherSection(theme),
-                const SizedBox(height: 16),
+                _buildVoucherSection(),
+                const SizedBox(height: 80),
               ],
             ),
           ),
@@ -107,7 +106,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     );
   }
 
-  Widget _buildAddressSection(ThemeData theme) {
+  Widget _buildAddressSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -145,14 +144,14 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.location_on_outlined,
-                  size: 16, color: theme.colorScheme.onSurfaceVariant),
+              const Icon(Icons.location_on_outlined,
+                  size: 16, color: Color(0xFF64748B)),
               const SizedBox(width: 6),
-              Text(
+              const Text(
                 '23 Estean, New York City, USA',
                 style: TextStyle(
                   fontSize: 14,
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: Color(0xFF64748B),
                 ),
               ),
             ],
@@ -162,7 +161,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     );
   }
 
-  Widget _buildCartItem(ThemeData theme, PharmacyCartItem item) {
+  Widget _buildCartItem(PharmacyCartItem item) {
     final price = item.totalPrice ??
         item.priceAtTime ??
         (item.product.sellingPrice ?? item.product.mrp ?? 0);
@@ -204,10 +203,10 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
               ),
               const SizedBox(height: 4),
               Text(
-                '${item.product.category?.name ?? 'Tablets'} • ${item.product.quantity ?? 60} ${_getUnitLabel(item)}',
-                style: TextStyle(
+                '${item.product.category?.name ?? 'Tablets'} • 60 Gummies',
+                style: const TextStyle(
                   fontSize: 13,
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: Color(0xFF64748B),
                 ),
               ),
               const SizedBox(height: 8),
@@ -227,22 +226,12 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
         IconButton(
           onPressed: () => _removeItem(item),
           icon: const Icon(Icons.delete_outline),
-          color: theme.colorScheme.onSurfaceVariant,
+          color: const Color(0xFF64748B),
           constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
           padding: EdgeInsets.zero,
         ),
       ],
     );
-  }
-
-  String _getUnitLabel(PharmacyCartItem item) {
-    final category = item.product.category?.name.toLowerCase() ?? '';
-    if (category.contains('tablet') || category.contains('pill')) {
-      return 'Pills';
-    } else if (category.contains('bottle') || category.contains('liquid')) {
-      return 'Gummies';
-    }
-    return 'Units';
   }
 
   Widget _buildQuantityControls(PharmacyCartItem item) {
@@ -292,13 +281,13 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     );
   }
 
-  Widget _buildVoucherSection(ThemeData theme) {
+  Widget _buildVoucherSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          Icon(Icons.card_giftcard_outlined,
-              size: 20, color: theme.colorScheme.onSurfaceVariant),
+          const Icon(Icons.card_giftcard_outlined,
+              size: 20, color: Color(0xFF64748B)),
           const SizedBox(width: 8),
           const Expanded(
             child: Text(
@@ -319,8 +308,8 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
               ),
             ),
             child: Row(
-              children: [
-                const Text(
+              children: const [
+                Text(
                   'MEDIXPERT',
                   style: TextStyle(
                     color: AppColors.primary,
@@ -328,8 +317,8 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                     fontSize: 12,
                   ),
                 ),
-                const SizedBox(width: 4),
-                const Icon(Icons.chevron_right, color: AppColors.primary, size: 18),
+                SizedBox(width: 4),
+                Icon(Icons.chevron_right, color: AppColors.primary, size: 18),
               ],
             ),
           ),
@@ -339,7 +328,6 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   }
 
   Widget _buildBottomBar(PharmacyCart cart) {
-    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -361,11 +349,11 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                const Text(
                   'Total',
                   style: TextStyle(
                     fontSize: 14,
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: Color(0xFF64748B),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -413,7 +401,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     );
   }
 
-  Widget _buildEmptyState(ThemeData theme) {
+  Widget _buildEmptyState() {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -428,11 +416,10 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
               style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'Add items from the pharmacy to continue.',
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              style: TextStyle(color: Color(0xFF64748B)),
             ),
             const SizedBox(height: 24),
             ElevatedButton(

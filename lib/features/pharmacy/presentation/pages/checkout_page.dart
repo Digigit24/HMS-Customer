@@ -16,8 +16,7 @@ class CheckoutPage extends StatefulWidget {
 
 class _CheckoutPageState extends State<CheckoutPage> {
   final notesCtrl = TextEditingController();
-  String selectedPayment = 'Payment on delivery cod';
-  double voucherDiscount = 50.0;
+  final double voucherDiscount = 50.0;
 
   @override
   void initState() {
@@ -33,7 +32,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -61,14 +59,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
           return const Center(child: CircularProgressIndicator());
         }
         if (cart == null || cart.cartItems.isEmpty) {
-          return _buildEmptyState(theme);
+          return _buildEmptyState();
         }
-        return _buildContent(theme, cart);
+        return _buildContent(cart);
       }),
     );
   }
 
-  Widget _buildContent(ThemeData theme, PharmacyCart cart) {
+  Widget _buildContent(PharmacyCart cart) {
     return Column(
       children: [
         Expanded(
@@ -77,28 +75,28 @@ class _CheckoutPageState extends State<CheckoutPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 16),
-                _buildAddressSection(theme),
+                _buildAddressSection(),
                 const SizedBox(height: 20),
-                _buildDeliveryInfoCard(theme, cart),
+                _buildDeliveryInfoCard(cart),
                 const SizedBox(height: 20),
-                _buildVoucherSection(theme),
+                _buildVoucherSection(),
                 const SizedBox(height: 12),
-                _buildPaymentSection(theme),
+                _buildPaymentSection(),
                 const SizedBox(height: 20),
-                _buildNotesSection(theme),
+                _buildNotesSection(),
                 const SizedBox(height: 20),
-                _buildSummary(theme, cart),
+                _buildSummary(cart),
                 const SizedBox(height: 20),
               ],
             ),
           ),
         ),
-        _buildBottomBar(cart),
+        _buildBottomBar(),
       ],
     );
   }
 
-  Widget _buildAddressSection(ThemeData theme) {
+  Widget _buildAddressSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -135,15 +133,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
           ),
           const SizedBox(height: 8),
           Row(
-            children: [
+            children: const [
               Icon(Icons.location_on_outlined,
-                  size: 16, color: theme.colorScheme.onSurfaceVariant),
-              const SizedBox(width: 6),
+                  size: 16, color: Color(0xFF64748B)),
+              SizedBox(width: 6),
               Text(
                 '23 Estean, New York City, USA',
                 style: TextStyle(
                   fontSize: 14,
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: Color(0xFF64748B),
                 ),
               ),
             ],
@@ -153,7 +151,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildDeliveryInfoCard(ThemeData theme, PharmacyCart cart) {
+  Widget _buildDeliveryInfoCard(PharmacyCart cart) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(16),
@@ -172,10 +170,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
-              children: [
-                const Icon(Icons.access_time, color: AppColors.primary, size: 20),
-                const SizedBox(width: 8),
-                const Expanded(
+              children: const [
+                Icon(Icons.access_time, color: AppColors.primary, size: 20),
+                SizedBox(width: 8),
+                Expanded(
                   child: Text(
                     'Orders will be delivered by 18:00 Tomorrow',
                     style: TextStyle(
@@ -238,28 +236,24 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Text(
-                              '${item.product.category?.name ?? 'Tablets'} • ${item.product.quantity ?? 50} Pills',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          '${item.product.category?.name ?? 'Tablets'} • 50 Pills',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF64748B),
+                          ),
                         ),
                         const SizedBox(height: 6),
                         Row(
                           children: [
-                            Icon(Icons.shopping_bag_outlined,
-                                size: 14, color: theme.colorScheme.onSurfaceVariant),
+                            const Icon(Icons.shopping_bag_outlined,
+                                size: 14, color: Color(0xFF64748B)),
                             const SizedBox(width: 4),
                             Text(
                               'Quatity: ${item.quantity.toString().padLeft(2, '0')}',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
-                                color: theme.colorScheme.onSurfaceVariant,
+                                color: Color(0xFF64748B),
                               ),
                             ),
                           ],
@@ -284,7 +278,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildVoucherSection(ThemeData theme) {
+  Widget _buildVoucherSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
@@ -296,8 +290,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         ),
         child: Row(
           children: [
-            Icon(Icons.card_giftcard_outlined,
-                size: 20, color: theme.colorScheme.onSurfaceVariant),
+            const Icon(Icons.card_giftcard_outlined,
+                size: 20, color: Color(0xFF64748B)),
             const SizedBox(width: 10),
             const Expanded(
               child: Text(
@@ -338,7 +332,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildPaymentSection(ThemeData theme) {
+  Widget _buildPaymentSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
@@ -355,8 +349,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
+                children: const [
+                  Text(
                     'Payment',
                     style: TextStyle(
                       fontSize: 12,
@@ -364,10 +358,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2),
                   Text(
-                    selectedPayment,
-                    style: const TextStyle(
+                    'Payment on delivery cod',
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF1E293B),
@@ -383,7 +377,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildNotesSection(ThemeData theme) {
+  Widget _buildNotesSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -408,15 +402,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
               controller: notesCtrl,
               maxLines: 4,
               maxLength: 225,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Take some notes for the shipper',
                 hintStyle: TextStyle(
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                  color: Color(0xFF94A3B8),
                   fontSize: 14,
                 ),
                 border: InputBorder.none,
-                contentPadding: const EdgeInsets.all(14),
-                counterStyle: const TextStyle(
+                contentPadding: EdgeInsets.all(14),
+                counterStyle: TextStyle(
                   fontSize: 11,
                   color: Color(0xFF94A3B8),
                 ),
@@ -428,7 +422,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildSummary(ThemeData theme, PharmacyCart cart) {
+  Widget _buildSummary(PharmacyCart cart) {
     final totalDeal = cart.totalAmount;
     final total = totalDeal - voucherDiscount;
 
@@ -443,15 +437,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
         ),
         child: Column(
           children: [
-            _buildSummaryRow('Total deal', '\$${totalDeal.toStringAsFixed(2)}', theme),
+            _buildSummaryRow('Total deal', '\$${totalDeal.toStringAsFixed(2)}'),
             const SizedBox(height: 10),
             _buildSummaryRow('Voucher', '-\$${voucherDiscount.toStringAsFixed(2)}',
-                theme,
                 valueColor: const Color(0xFF10B981)),
             const SizedBox(height: 10),
             const Divider(height: 1, color: Color(0xFFE2E8F0)),
             const SizedBox(height: 10),
-            _buildSummaryRow('Total', '\$${total.toStringAsFixed(2)}', theme,
+            _buildSummaryRow('Total', '\$${total.toStringAsFixed(2)}',
                 isBold: true),
           ],
         ),
@@ -459,7 +452,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, ThemeData theme,
+  Widget _buildSummaryRow(String label, String value,
       {bool isBold = false, Color? valueColor}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -484,7 +477,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildBottomBar(PharmacyCart cart) {
+  Widget _buildBottomBar() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -537,7 +530,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     );
   }
 
-  Widget _buildEmptyState(ThemeData theme) {
+  Widget _buildEmptyState() {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -552,11 +545,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
               style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'Add items from the pharmacy to continue.',
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              style: TextStyle(color: Color(0xFF64748B)),
             ),
             const SizedBox(height: 24),
             ElevatedButton(

@@ -37,427 +37,360 @@ class _PharmacyTabState extends State<PharmacyTab> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Obx(() {
       final isLoading = controller.isLoadingProducts.value;
       final products = _filteredProducts();
       final cart = controller.cart.value;
 
       return Scaffold(
-        backgroundColor:
-            theme.brightness == Brightness.dark ? const Color(0xFF0F172A) : const Color(0xFFF8F9FA),
-        body: SafeArea(
-          child: RefreshIndicator(
-            onRefresh: () async {
-              await controller.loadProducts();
-              await controller.loadCart();
-            },
-            child: Column(
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  color: theme.brightness == Brightness.dark
-                      ? const Color(0xFF0F172A)
-                      : const Color(0xFFF8F9FA),
-                  child: Column(
-                    children: [
-                      _buildHeader(theme),
-                      const SizedBox(height: 12),
-                      _buildSearchField(),
-                      const SizedBox(height: 12),
-                      _buildCategoriesAndFilter(),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      if (controller.error.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
-                      controller.error.value,
-                      style: TextStyle(
-                        color: theme.colorScheme.error,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                if (isLoading)
-                  const Center(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                if (!isLoading && products.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 32),
-                    child: Column(
-                      children: [
-                        Icon(Icons.local_pharmacy, size: 48, color: Colors.grey[500]),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'No medicines found',
-                          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'Try a different category or search term.',
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                      ],
-                    ),
-                  ),
-                if (!isLoading && products.isNotEmpty)
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 0.78,
-                    ),
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      return _buildProductCard(products[index]);
-                    },
-                  ),
-                const SizedBox(height: 80),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        bottomNavigationBar: cart != null && cart.cartItems.isNotEmpty
-            ? _buildCartBar(cart.totalAmount, cart.totalItems)
-            : null,
-      );
-    });
-  }
-
-  Widget _buildHeader(ThemeData theme) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Pharmacy',
-              style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Order your medicines quickly',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-        IconButton(
-          onPressed: () {
-            Get.to(() => ShoppingCartPage(controller: controller));
-          },
-          icon: Stack(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: AppColors.primary,
+          elevation: 0,
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.shopping_bag_outlined),
-              Obx(() {
-                final count = controller.cart.value?.totalItems ?? 0;
-                if (count == 0) return const SizedBox.shrink();
-                return Positioned(
-                  right: 0,
-                  top: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    child: Text(
-                      count.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                );
-              }),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSearchField() {
-    return TextField(
-      decoration: InputDecoration(
-        hintText: 'Search medicines',
-        prefixIcon: const Icon(Icons.search),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide.none,
-        ),
-      ),
-      onChanged: (val) {
-        setState(() {
-          search = val.trim();
-        });
-      },
-    );
-  }
-
-  Widget _buildCategoriesAndFilter() {
-    return Row(
-      children: [
-        Expanded(child: _buildCategories()),
-        const SizedBox(width: 8),
-        Container(
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: IconButton(
-            onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) => const FilterBottomSheet(),
-              );
-            },
-            icon: const Icon(Icons.tune, color: Colors.white),
-            padding: const EdgeInsets.all(8),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCategories() {
-    if (controller.categories.isEmpty) return const SizedBox.shrink();
-    return SizedBox(
-      height: 42,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: controller.categories.length + 1,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
-        itemBuilder: (context, index) {
-          final isAll = index == 0;
-          final cat = isAll ? null : controller.categories[index - 1];
-          final selected = isAll ? selectedCategoryId == null : selectedCategoryId == cat!.id;
-          final label = isAll ? 'All' : cat!.name;
-          return ChoiceChip(
-            label: Text(label),
-            selected: selected,
-            onSelected: (_) {
-              setState(() {
-                selectedCategoryId = isAll ? null : cat!.id;
-              });
-            },
-            selectedColor: AppColors.primary,
-            labelStyle: TextStyle(
-              color: selected ? Colors.white : Colors.black87,
-              fontWeight: FontWeight.w600,
-            ),
-            backgroundColor: Colors.white,
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildProductCard(PharmacyProduct product) {
-    final theme = Theme.of(context);
-    final qty = controller.getQuantity(product.id);
-    final price = product.sellingPrice ?? product.mrp ?? 0;
-    final inStock = product.isInStock && (product.quantity ?? 1) > 0;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.15)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.06),
-            offset: const Offset(0, 4),
-            blurRadius: 12,
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product.productName,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    if (product.company != null && product.company!.isNotEmpty)
-                      Text(
-                        product.company!,
-                        style: TextStyle(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontSize: 13,
-                        ),
-                      ),
-                    if (product.category != null)
-                      Container(
-                        margin: const EdgeInsets.only(top: 6),
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          product.category!.name,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                  ],
+              const Text(
+                'Online Pharmacy',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              Row(
                 children: [
                   Text(
-                    'Rs ${price.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
+                    'Online Pharmacy',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 11,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  Icon(Icons.chevron_right,
+                      size: 12, color: Colors.white.withOpacity(0.8)),
                   Text(
-                    inStock ? 'In stock' : 'Out of stock',
+                    'Prescription Drugs',
                     style: TextStyle(
-                      color: inStock ? Colors.green : Colors.red,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 11,
+                    ),
+                  ),
+                  Icon(Icons.chevron_right,
+                      size: 12, color: Colors.white.withOpacity(0.8)),
+                  Text(
+                    'Analgesic',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 11,
                     ),
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              if (product.lowStockWarning)
-                Text(
-                  'Low stock',
-                  style: TextStyle(
-                    color: Colors.orange[700],
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                )
-              else
-                const SizedBox.shrink(),
-              qty == 0
-                  ? ElevatedButton(
-                      onPressed: inStock ? () => _handleAdd(product) : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+          actions: [
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+            ),
+            IconButton(
+              onPressed: () {
+                Get.to(() => ShoppingCartPage(controller: controller));
+              },
+              icon: Stack(
+                children: [
+                  const Icon(Icons.shopping_cart_outlined, color: Colors.white),
+                  Obx(() {
+                    final count = controller.cart.value?.totalItems ?? 0;
+                    if (count == 0) return const SizedBox.shrink();
+                    return Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          count.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
                       ),
-                      child: const Text('Add to cart'),
-                    )
-                  : _buildQuantityChip(product, qty),
-            ],
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ],
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'Analgesic',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1E293B),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Products (34)',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => const FilterBottomSheet(),
+                      );
+                    },
+                    icon: const Icon(Icons.tune),
+                    color: const Color(0xFF64748B),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : products.isEmpty
+                      ? _buildEmptyState()
+                      : GridView.builder(
+                          padding: const EdgeInsets.all(16),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 16,
+                            crossAxisSpacing: 16,
+                            childAspectRatio: 0.7,
+                          ),
+                          itemCount: products.length,
+                          itemBuilder: (context, index) {
+                            return _buildProductCard(products[index]);
+                          },
+                        ),
+            ),
+          ],
+        ),
+        bottomNavigationBar: cart != null && cart.cartItems.isNotEmpty
+            ? _buildBottomCartBar(cart.totalAmount, cart.totalItems)
+            : null,
+      );
+    });
+  }
+
+  Widget _buildProductCard(PharmacyProduct product) {
+    final qty = controller.getQuantity(product.id);
+    final price = product.sellingPrice ?? product.mrp ?? 0;
+    final originalPrice = product.mrp ?? price;
+    final discount = originalPrice > price
+        ? ((originalPrice - price) / originalPrice * 100).round()
+        : 0;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildQuantityChip(PharmacyProduct product, int qty) {
-    final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconButton(
-            onPressed: () => _handleDecrement(product),
-            icon: const Icon(Icons.remove),
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            padding: EdgeInsets.zero,
-            color: AppColors.primary,
+          Stack(
+            children: [
+              Container(
+                height: 120,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8FAFC),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(12)),
+                ),
+                child: Center(
+                  child: product.imageUrl != null &&
+                          product.imageUrl!.isNotEmpty
+                      ? Image.network(
+                          product.imageUrl!,
+                          height: 80,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.local_pharmacy,
+                            size: 48,
+                            color: AppColors.primary,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.local_pharmacy,
+                          size: 48,
+                          color: AppColors.primary,
+                        ),
+                ),
+              ),
+              if (discount > 0)
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '-$discount%',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              '$qty',
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Color(0xFFFBBF24), size: 14),
+                      const SizedBox(width: 4),
+                      const Text(
+                        '4.8',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 2),
+                      Text(
+                        '(454)',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    product.productName,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '5ml',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      Text(
+                        '\$${price.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      if (discount > 0) ...[
+                        const SizedBox(width: 6),
+                        Text(
+                          '\$${originalPrice.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            decoration: TextDecoration.lineThrough,
+                            color: Colors.grey[500],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
-          IconButton(
-            onPressed: () => _handleIncrement(product),
-            icon: const Icon(Icons.add),
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            padding: EdgeInsets.zero,
-            color: AppColors.primary,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.local_pharmacy_outlined,
+              size: 64, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          const Text(
+            'No products found',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF64748B),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCartBar(double totalAmount, int totalItems) {
+  Widget _buildBottomCartBar(double totalAmount, int totalItems) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
           ),
         ],
       ),
@@ -468,51 +401,47 @@ class _PharmacyTabState extends State<PharmacyTab> {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     '$totalItems items',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF64748B),
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Total: Rs ${totalAmount.toStringAsFixed(2)}',
+                    'Total: \$${totalAmount.toStringAsFixed(2)}',
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 18,
                       fontWeight: FontWeight.w700,
+                      color: Color(0xFF1E293B),
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(
-              width: 140,
-              child: ElevatedButton(
-                onPressed: controller.isPlacingOrder.value
-                    ? null
-                    : () {
-                        Get.to(() => ShoppingCartPage(controller: controller));
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+            ElevatedButton(
+              onPressed: () {
+                Get.to(() => ShoppingCartPage(controller: controller));
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: controller.isPlacingOrder.value
-                    ? const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text(
-                        'Checkout',
-                        style: TextStyle(fontWeight: FontWeight.w700),
-                      ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'View Cart',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -536,55 +465,4 @@ class _PharmacyTabState extends State<PharmacyTab> {
     }
     return list;
   }
-
-  Future<void> _handleAdd(PharmacyProduct product) async {
-    final ok = await controller.addToCart(product);
-    if (!ok) {
-      AppToast.showError(
-        controller.error.value.isNotEmpty
-            ? controller.error.value
-            : 'Failed to add to cart',
-      );
-      return;
-    }
-    setState(() {});
-  }
-
-  Future<void> _handleIncrement(PharmacyProduct product) async {
-    final ok = await controller.incrementItem(product);
-    if (!ok) {
-      AppToast.showError(
-        controller.error.value.isNotEmpty
-            ? controller.error.value
-            : 'Failed to update cart',
-      );
-      return;
-    }
-    setState(() {});
-  }
-
-  Future<void> _handleDecrement(PharmacyProduct product) async {
-    final ok = await controller.decrementItem(product);
-    if (!ok) {
-      AppToast.showError(
-        controller.error.value.isNotEmpty
-            ? controller.error.value
-            : 'Failed to update cart',
-      );
-      return;
-    }
-    setState(() {});
-  }
-
-  Future<void> _handleCheckout() async {
-    final order = await controller.checkout();
-    if (order == null) {
-      if (controller.error.value.isNotEmpty) {
-        AppToast.showError(controller.error.value);
-      }
-      return;
-    }
-  }
 }
-
-
