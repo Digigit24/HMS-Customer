@@ -117,7 +117,7 @@ class _AppointmentHistoryPageState extends State<AppointmentHistoryPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        appointment.doctor?.name ?? 'Doctor',
+                        appointment.doctorName ?? 'Doctor',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -125,7 +125,7 @@ class _AppointmentHistoryPageState extends State<AppointmentHistoryPage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        appointment.doctor?.specialization ?? appointment.department?.name ?? 'General',
+                        appointment.doctorSpecialty ?? 'General',
                         style: TextStyle(
                           fontSize: 13,
                           color: theme.colorScheme.onSurfaceVariant,
@@ -134,7 +134,7 @@ class _AppointmentHistoryPageState extends State<AppointmentHistoryPage> {
                     ],
                   ),
                 ),
-                _buildStatusBadge(appointment.statusDisplay ?? appointment.status),
+                _buildStatusBadge(appointment.status),
               ],
             ),
             const SizedBox(height: 16),
@@ -149,7 +149,7 @@ class _AppointmentHistoryPageState extends State<AppointmentHistoryPage> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  _formatDate(appointment.appointmentDate),
+                  appointment.appointmentDate ?? 'N/A',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -163,7 +163,7 @@ class _AppointmentHistoryPageState extends State<AppointmentHistoryPage> {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  appointment.startTime ?? 'N/A',
+                  appointment.appointmentTime ?? 'N/A',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -171,7 +171,7 @@ class _AppointmentHistoryPageState extends State<AppointmentHistoryPage> {
                 ),
               ],
             ),
-            if (appointment.reason != null && appointment.reason!.isNotEmpty) ...[
+            if (appointment.chiefComplaint != null && appointment.chiefComplaint!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -191,7 +191,7 @@ class _AppointmentHistoryPageState extends State<AppointmentHistoryPage> {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        appointment.reason!,
+                        appointment.chiefComplaint!,
                         style: TextStyle(
                           fontSize: 13,
                           color: theme.colorScheme.onSurfaceVariant,

@@ -111,7 +111,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      _formatDate(order.createdAt),
+                      order.createdAt != null ? _formatDate(order.createdAt!) : 'N/A',
                       style: TextStyle(
                         fontSize: 13,
                         color: theme.colorScheme.onSurfaceVariant,
@@ -119,7 +119,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                     ),
                   ],
                 ),
-                _buildStatusBadge(order.statusDisplay ?? order.status),
+                _buildStatusBadge(order.status ?? 'pending'),
               ],
             ),
           ),
@@ -129,7 +129,7 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ...order.orderItems.take(2).map((item) {
+                ...order.items.take(2).map((item) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: Row(
@@ -184,9 +184,9 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                     ),
                   );
                 }).toList(),
-                if (order.orderItems.length > 2)
+                if (order.items.length > 2)
                   Text(
-                    '+${order.orderItems.length - 2} more items',
+                    '+${order.items.length - 2} more items',
                     style: TextStyle(
                       fontSize: 12,
                       color: theme.colorScheme.onSurfaceVariant,
@@ -215,28 +215,6 @@ class _OrderHistoryPageState extends State<OrderHistoryPage> {
                     ),
                   ],
                 ),
-                if (order.shippingAddress != null) ...[
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        size: 16,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          order.shippingAddress!,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
               ],
             ),
           ),
