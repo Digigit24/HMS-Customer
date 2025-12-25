@@ -17,9 +17,13 @@ class PharmacyController extends GetxController {
   final cart = Rxn<PharmacyCart>();
   final orders = <PharmacyOrder>[].obs;
 
+  // Local cart state - stores product quantities before syncing to backend
+  final localCartItems = <int, int>{}.obs; // Map<productId, quantity>
+
   final isLoadingProducts = false.obs;
   final isLoadingCart = false.obs;
   final isPlacingOrder = false.obs;
+  final isSyncingCart = false.obs;
   final error = ''.obs;
 
   @override
@@ -63,6 +67,14 @@ class PharmacyController extends GetxController {
     try {
       final c = await repo.fetchCart();
       cart.value = c;
+
+      // Initialize local cart items from server cart
+      localCartItems.clear();
+      if (c != null) {
+        for (final item in c.cartItems) {
+          localCartItems[item.product.id] = item.quantity;
+        }
+      }
     } on ApiException catch (e) {
       error.value = e.message;
       AppToast.showError(e.message);
@@ -71,100 +83,32 @@ class PharmacyController extends GetxController {
     }
   }
 
-  Future<bool> addToCart(PharmacyProduct product) async {
-    // Store previous cart for rollback
-    final previousCart = cart.value;
-
-    // Optimistic UI update
-    final optimisticCart = _createOptimisticCartForAdd(product);
-    cart.value = optimisticCart;
-
-    try {
-      final updated = await repo.addItem(
-        productId: product.id,
-        quantity: 1,
-      );
-      cart.value = updated;
-      AppToast.showSuccess('${product.productName} added to cart');
-      return true;
-    } on ApiException catch (e) {
-      // Rollback on error
-      cart.value = previousCart;
-      error.value = e.message;
-      AppToast.showError(e.message);
-      return false;
-    }
+  void addToCart(PharmacyProduct product) {
+    // Update local cart state only
+    final currentQty = localCartItems[product.id] ?? 0;
+    localCartItems[product.id] = currentQty + 1;
+    AppToast.showSuccess('${product.productName} added to cart');
   }
 
-  Future<bool> incrementItem(PharmacyProduct product) async {
-    final currentQty = getQuantity(product.id);
-    final existingItem = _findCartItem(product.id);
-    if (existingItem == null) {
-      return addToCart(product);
-    }
-
-    // Store previous cart for rollback
-    final previousCart = cart.value;
-
-    final newQty = currentQty + 1;
-
-    // Optimistic UI update
-    final optimisticCart = _createOptimisticCartForUpdate(product.id, newQty);
-    cart.value = optimisticCart;
-
-    try {
-      final updated = await repo.updateItem(
-        cartItemId: existingItem.id,
-        quantity: newQty,
-      );
-      cart.value = updated;
-      AppToast.showSuccess('Updated ${product.productName} to $newQty');
-      return true;
-    } on ApiException catch (e) {
-      // Rollback on error
-      cart.value = previousCart;
-      error.value = e.message;
-      AppToast.showError(e.message);
-      return false;
-    }
+  void incrementItem(PharmacyProduct product) {
+    // Update local cart state only
+    final currentQty = localCartItems[product.id] ?? 0;
+    localCartItems[product.id] = currentQty + 1;
+    AppToast.showSuccess('Updated to ${currentQty + 1}');
   }
 
-  Future<bool> decrementItem(PharmacyProduct product) async {
-    final existingItem = _findCartItem(product.id);
-    if (existingItem == null) return false;
+  void decrementItem(PharmacyProduct product) {
+    // Update local cart state only
+    final currentQty = localCartItems[product.id] ?? 0;
+    if (currentQty <= 0) return;
 
-    // Store previous cart for rollback
-    final previousCart = cart.value;
-
-    final newQty = existingItem.quantity - 1;
-
-    // Optimistic UI update
-    final optimisticCart = newQty <= 0
-        ? _createOptimisticCartForRemove(product.id)
-        : _createOptimisticCartForUpdate(product.id, newQty);
-    cart.value = optimisticCart;
-
-    try {
-      if (newQty <= 0) {
-        final updated =
-            await repo.removeItem(cartItemId: existingItem.id);
-        cart.value = updated;
-        AppToast.showInfo('${product.productName} removed from cart');
-      } else {
-        final updated = await repo.updateItem(
-          cartItemId: existingItem.id,
-          quantity: newQty,
-        );
-        cart.value = updated;
-        AppToast.showSuccess('Updated ${product.productName} to $newQty');
-      }
-      return true;
-    } on ApiException catch (e) {
-      // Rollback on error
-      cart.value = previousCart;
-      error.value = e.message;
-      AppToast.showError(e.message);
-      return false;
+    final newQty = currentQty - 1;
+    if (newQty <= 0) {
+      localCartItems.remove(product.id);
+      AppToast.showInfo('${product.productName} removed from cart');
+    } else {
+      localCartItems[product.id] = newQty;
+      AppToast.showSuccess('Updated to $newQty');
     }
   }
 
@@ -224,8 +168,22 @@ class PharmacyController extends GetxController {
   }
 
   int getQuantity(int productId) {
+    // Check local cart first, then fall back to server cart
+    if (localCartItems.containsKey(productId)) {
+      return localCartItems[productId]!;
+    }
     final item = _findCartItem(productId);
     return item?.quantity ?? 0;
+  }
+
+  // Get total items count from local cart
+  int get totalLocalItems {
+    return localCartItems.values.fold<int>(0, (sum, qty) => sum + qty);
+  }
+
+  // Check if there are unsaved local changes
+  bool get hasLocalChanges {
+    return localCartItems.isNotEmpty;
   }
 
   PharmacyCartItem? _findCartItem(int productId) {
@@ -237,107 +195,45 @@ class PharmacyController extends GetxController {
     return null;
   }
 
-  /// Create optimistic cart when adding a new product
-  PharmacyCart _createOptimisticCartForAdd(PharmacyProduct product) {
-    final currentCart = cart.value;
-    final price = product.sellingPrice ?? product.mrp ?? 0;
-
-    // Create new cart item
-    final newItem = PharmacyCartItem(
-      id: -1, // Temporary ID
-      product: product,
-      quantity: 1,
-      priceAtTime: price,
-      totalPrice: price,
-    );
-
-    if (currentCart == null) {
-      // Create new cart
-      return PharmacyCart(
-        id: -1, // Temporary ID
-        cartItems: [newItem],
-        totalItems: 1,
-        totalAmount: price,
-      );
-    } else {
-      // Add to existing cart
-      final updatedItems = [...currentCart.cartItems, newItem];
-      return PharmacyCart(
-        id: currentCart.id,
-        userId: currentCart.userId,
-        cartItems: updatedItems,
-        totalItems: currentCart.totalItems + 1,
-        totalAmount: currentCart.totalAmount + price,
-        createdAt: currentCart.createdAt,
-        updatedAt: DateTime.now(),
-      );
+  /// Sync local cart changes to backend
+  /// This should be called before viewing cart or proceeding to checkout
+  Future<bool> syncCartToBackend() async {
+    if (localCartItems.isEmpty) {
+      // No local changes, just reload cart from server
+      await loadCart();
+      return true;
     }
-  }
 
-  /// Create optimistic cart when updating quantity
-  PharmacyCart? _createOptimisticCartForUpdate(int productId, int newQuantity) {
-    final currentCart = cart.value;
-    if (currentCart == null) return null;
+    isSyncingCart.value = true;
+    try {
+      // First, clear the backend cart to start fresh
+      await repo.clearCart();
 
-    final updatedItems = currentCart.cartItems.map((item) {
-      if (item.product.id == productId) {
-        final price = item.priceAtTime ?? item.product.sellingPrice ?? item.product.mrp ?? 0;
-        return PharmacyCartItem(
-          id: item.id,
-          product: item.product,
-          quantity: newQuantity,
-          priceAtTime: price,
-          totalPrice: price * newQuantity,
-        );
+      // Add all items from local cart to backend
+      for (final entry in localCartItems.entries) {
+        final productId = entry.key;
+        final quantity = entry.value;
+
+        if (quantity > 0) {
+          await repo.addItem(
+            productId: productId,
+            quantity: quantity,
+          );
+        }
       }
-      return item;
-    }).toList();
 
-    final totalItems = updatedItems.fold<int>(0, (sum, item) => sum + item.quantity);
-    final totalAmount = updatedItems.fold<double>(0, (sum, item) => sum + (item.totalPrice ?? 0));
+      // Reload cart from backend to get updated totals
+      await loadCart();
 
-    return PharmacyCart(
-      id: currentCart.id,
-      userId: currentCart.userId,
-      cartItems: updatedItems,
-      totalItems: totalItems,
-      totalAmount: totalAmount,
-      createdAt: currentCart.createdAt,
-      updatedAt: DateTime.now(),
-    );
-  }
-
-  /// Create optimistic cart when removing a product
-  PharmacyCart? _createOptimisticCartForRemove(int productId) {
-    final currentCart = cart.value;
-    if (currentCart == null) return null;
-
-    final updatedItems = currentCart.cartItems.where((item) => item.product.id != productId).toList();
-
-    if (updatedItems.isEmpty) {
-      return PharmacyCart(
-        id: currentCart.id,
-        userId: currentCart.userId,
-        cartItems: [],
-        totalItems: 0,
-        totalAmount: 0,
-        createdAt: currentCart.createdAt,
-        updatedAt: DateTime.now(),
-      );
+      AppToast.showSuccess('Cart updated successfully');
+      return true;
+    } on ApiException catch (e) {
+      error.value = e.message;
+      AppToast.showError('Failed to sync cart: ${e.message}');
+      return false;
+    } finally {
+      isSyncingCart.value = false;
     }
-
-    final totalItems = updatedItems.fold<int>(0, (sum, item) => sum + item.quantity);
-    final totalAmount = updatedItems.fold<double>(0, (sum, item) => sum + (item.totalPrice ?? 0));
-
-    return PharmacyCart(
-      id: currentCart.id,
-      userId: currentCart.userId,
-      cartItems: updatedItems,
-      totalItems: totalItems,
-      totalAmount: totalAmount,
-      createdAt: currentCart.createdAt,
-      updatedAt: DateTime.now(),
-    );
   }
 
   /// Create Razorpay order on backend

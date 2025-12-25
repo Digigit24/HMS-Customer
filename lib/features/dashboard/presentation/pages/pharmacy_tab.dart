@@ -100,14 +100,16 @@ class _PharmacyTabState extends State<PharmacyTab> {
               icon: const Icon(Icons.notifications_outlined, color: Colors.white),
             ),
             IconButton(
-              onPressed: () {
+              onPressed: () async {
+                // Sync local cart to backend before viewing cart
+                await controller.syncCartToBackend();
                 Get.to(() => ShoppingCartPage(controller: controller));
               },
               icon: Stack(
                 children: [
                   const Icon(Icons.shopping_cart_outlined, color: Colors.white),
                   Obx(() {
-                    final count = controller.cart.value?.totalItems ?? 0;
+                    final count = controller.totalLocalItems;
                     if (count == 0) return const SizedBox.shrink();
                     return Positioned(
                       right: 0,
@@ -205,8 +207,8 @@ class _PharmacyTabState extends State<PharmacyTab> {
             ],
           ),
         ),
-        bottomNavigationBar: cart != null && cart.cartItems.isNotEmpty
-            ? _buildBottomCartBar(cart.totalAmount, cart.totalItems)
+        bottomNavigationBar: controller.totalLocalItems > 0
+            ? _buildBottomCartBar()
             : null,
       );
     });
@@ -387,8 +389,8 @@ class _PharmacyTabState extends State<PharmacyTab> {
                         width: double.infinity,
                         height: 36,
                         child: ElevatedButton(
-                          onPressed: () async {
-                            await controller.addToCart(product);
+                          onPressed: () {
+                            controller.addToCart(product);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: primaryColor,
@@ -418,8 +420,8 @@ class _PharmacyTabState extends State<PharmacyTab> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             InkWell(
-                              onTap: () async {
-                                await controller.decrementItem(product);
+                              onTap: () {
+                                controller.decrementItem(product);
                               },
                               borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(8),
@@ -445,8 +447,8 @@ class _PharmacyTabState extends State<PharmacyTab> {
                               ),
                             ),
                             InkWell(
-                              onTap: () async {
-                                await controller.incrementItem(product);
+                              onTap: () {
+                                controller.incrementItem(product);
                               },
                               borderRadius: const BorderRadius.only(
                                 topRight: Radius.circular(8),
@@ -496,9 +498,24 @@ class _PharmacyTabState extends State<PharmacyTab> {
     );
   }
 
-  Widget _buildBottomCartBar(double totalAmount, int totalItems) {
+  Widget _buildBottomCartBar() {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
+
+    // Calculate total from local cart items
+    final totalItems = controller.totalLocalItems;
+    double totalAmount = 0;
+    for (final entry in controller.localCartItems.entries) {
+      final productId = entry.key;
+      final quantity = entry.value;
+      final product = controller.products.firstWhere(
+        (p) => p.id == productId,
+        orElse: () => controller.products.first,
+      );
+      final price = product.sellingPrice ?? product.mrp ?? 0;
+      totalAmount += price * quantity;
+    }
+
     return Container(
       padding: EdgeInsets.all(context.padding(16)),
       decoration: BoxDecoration(
@@ -540,7 +557,9 @@ class _PharmacyTabState extends State<PharmacyTab> {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
+                // Sync local cart to backend before viewing cart
+                await controller.syncCartToBackend();
                 Get.to(() => ShoppingCartPage(controller: controller));
               },
               style: ElevatedButton.styleFrom(
