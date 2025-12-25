@@ -19,7 +19,7 @@ class CheckoutPage extends StatefulWidget {
 
 class _CheckoutPageState extends State<CheckoutPage> {
   final notesCtrl = TextEditingController();
-  final double voucherDiscount = 50.0;
+  final double voucherDiscount = 0.0; // Set to 0 for now - implement voucher system properly later
   String selectedPaymentMethod = 'razorpay'; // 'razorpay' or 'cod'
   final themeController = Get.find<ThemeController>();
 
@@ -786,7 +786,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
 
     final totalDeal = cart.totalAmount;
-    final total = totalDeal - voucherDiscount;
+    // Ensure discount doesn't make total negative
+    final discount = totalDeal > voucherDiscount ? voucherDiscount : 0.0;
+    final total = totalDeal - discount;
+
+    // Validate amount
+    if (total <= 0) {
+      AppToast.showError('Invalid order amount');
+      return;
+    }
 
     // Check payment method
     if (selectedPaymentMethod == 'razorpay') {
