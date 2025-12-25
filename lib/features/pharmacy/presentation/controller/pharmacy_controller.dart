@@ -84,17 +84,33 @@ class PharmacyController extends GetxController {
   }
 
   void addToCart(PharmacyProduct product) {
-    // Update local cart state only
+    // Check stock availability
     final currentQty = localCartItems[product.id] ?? 0;
-    localCartItems[product.id] = currentQty + 1;
+    final newQty = currentQty + 1;
+
+    if (newQty > product.quantity) {
+      AppToast.showError('Only ${product.quantity} items available in stock');
+      return;
+    }
+
+    // Update local cart state only
+    localCartItems[product.id] = newQty;
     AppToast.showSuccess('${product.productName} added to cart');
   }
 
   void incrementItem(PharmacyProduct product) {
-    // Update local cart state only
+    // Check stock availability
     final currentQty = localCartItems[product.id] ?? 0;
-    localCartItems[product.id] = currentQty + 1;
-    AppToast.showSuccess('Updated to ${currentQty + 1}');
+    final newQty = currentQty + 1;
+
+    if (newQty > product.quantity) {
+      AppToast.showError('Only ${product.quantity} items available in stock');
+      return;
+    }
+
+    // Update local cart state only
+    localCartItems[product.id] = newQty;
+    AppToast.showSuccess('Updated to $newQty');
   }
 
   void decrementItem(PharmacyProduct product) {
@@ -229,7 +245,20 @@ class PharmacyController extends GetxController {
       return true;
     } on ApiException catch (e) {
       error.value = e.message;
-      AppToast.showError('Failed to sync cart: ${e.message}');
+
+      // Check if it's a stock error
+      if (e.message.toLowerCase().contains('stock')) {
+        // Extract stock info from error message
+        final match = RegExp(r'Available:\s*(\d+)').firstMatch(e.message);
+        if (match != null) {
+          final availableStock = int.parse(match.group(1)!);
+          AppToast.showError('Insufficient stock! Only $availableStock items available');
+        } else {
+          AppToast.showError('Insufficient stock: ${e.message}');
+        }
+      } else {
+        AppToast.showError('Failed to sync cart: ${e.message}');
+      }
       return false;
     } finally {
       isSyncingCart.value = false;

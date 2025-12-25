@@ -339,12 +339,29 @@ class _PharmacyTabState extends State<PharmacyTab> {
                       ),
                     ),
                     SizedBox(height: context.spacing(4)),
-                    Text(
-                      '5ml',
-                      style: TextStyle(
-                        fontSize: context.fontSize(12),
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.inventory_2_outlined,
+                          size: context.iconSize(12),
+                          color: product.quantity < 10
+                              ? Colors.red
+                              : theme.colorScheme.onSurfaceVariant,
+                        ),
+                        SizedBox(width: context.spacing(4)),
+                        Text(
+                          '${product.quantity} in stock',
+                          style: TextStyle(
+                            fontSize: context.fontSize(11),
+                            color: product.quantity < 10
+                                ? Colors.red
+                                : theme.colorScheme.onSurfaceVariant,
+                            fontWeight: product.quantity < 10
+                                ? FontWeight.w600
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ],
                     ),
                     const Spacer(),
                     Row(
