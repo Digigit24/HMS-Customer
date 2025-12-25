@@ -93,14 +93,17 @@ class RazorpayService {
     }
 
     try {
+      log('🚀 Opening Razorpay with options: $options');
       _razorpay.open(options);
+      log('✅ Razorpay.open() called successfully');
     } catch (e) {
-      log('Error opening Razorpay checkout: $e');
+      log('❌ Error opening Razorpay checkout: $e');
+      log('Stack trace: ${StackTrace.current}');
       // Call failure callback with error
       if (_onFailure != null) {
         _onFailure!(PaymentFailureResponse(
           0,
-          'Failed to open payment gateway',
+          'Failed to open payment gateway: $e',
           null,
         ));
       }
@@ -132,28 +135,32 @@ class RazorpayService {
 
   /// Handle successful payment
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    log('Payment Success: ${response.paymentId}');
+    log('✅ Payment Success: ${response.paymentId}');
     log('Order ID: ${response.orderId}');
     log('Signature: ${response.signature}');
 
     if (_onSuccess != null) {
       _onSuccess!(response);
+    } else {
+      log('⚠️ Warning: No success callback registered');
     }
   }
 
   /// Handle payment failure
   void _handlePaymentError(PaymentFailureResponse response) {
-    log('Payment Error: ${response.code} - ${response.message}');
+    log('❌ Payment Error: ${response.code} - ${response.message}');
     log('Error Data: ${response.error}');
 
     if (_onFailure != null) {
       _onFailure!(response);
+    } else {
+      log('⚠️ Warning: No failure callback registered');
     }
   }
 
   /// Handle external wallet selection
   void _handleExternalWallet(ExternalWalletResponse response) {
-    log('External Wallet Selected: ${response.walletName}');
+    log('💳 External Wallet Selected: ${response.walletName}');
 
     if (_onWalletSelection != null) {
       _onWalletSelection!();
