@@ -952,15 +952,10 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                     final appointmentTypeId =
                         parseInt(appointmentTypeIdCtrl.text);
 
-                    final patientIdValue =
-                        currentUserId == null || currentUserId!.isEmpty
-                            ? null
-                            : (int.tryParse(currentUserId!) ?? currentUserId);
-
-                    if (patientIdValue == null || doctorId == null) {
+                    if (doctorId == null) {
                       Get.snackbar(
                         'Missing info',
-                        'Patient (current user) and Doctor are required',
+                        'Doctor is required',
                         snackPosition: SnackPosition.BOTTOM,
                       );
                       return;
@@ -981,7 +976,7 @@ class _AppointmentsTabState extends State<AppointmentsTab> {
                       'appointment_time': timeStr,
                       'status': 'scheduled',
                       'priority': priority,
-                      'patient_id': patientIdValue,
+                      // Backend will determine patient_id from authenticated user
                       'doctor_id': doctorId,
                       if (appointmentTypeId != null)
                         'appointment_type_id': appointmentTypeId,
