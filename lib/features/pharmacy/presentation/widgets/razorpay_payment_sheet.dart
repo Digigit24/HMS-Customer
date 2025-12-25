@@ -1,17 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../../core/utils/app_colors.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import '../../../../core/services/razorpay_service.dart';
+import '../../../../core/theme/theme_controller.dart';
 
+/// Razorpay Payment Sheet Widget
+///
+/// This widget handles the Razorpay payment flow:
+/// 1. Displays payment processing UI
+/// 2. Initiates Razorpay checkout
+/// 3. Handles payment success/failure callbacks
+/// 4. Supports dark/light mode themes
 class RazorpayPaymentSheet extends StatefulWidget {
   final double amount;
-  final String orderId;
-  final VoidCallback onSuccess;
-  final VoidCallback onFailure;
+  final String razorpayOrderId;
+  final String customerName;
+  final String customerEmail;
+  final String customerPhone;
+  final String? description;
+  final Function(PaymentSuccessResponse) onSuccess;
+  final Function(PaymentFailureResponse) onFailure;
 
   const RazorpayPaymentSheet({
     super.key,
     required this.amount,
-    required this.orderId,
+    required this.razorpayOrderId,
+    required this.customerName,
+    required this.customerEmail,
+    required this.customerPhone,
+    this.description,
     required this.onSuccess,
     required this.onFailure,
   });
@@ -21,44 +38,120 @@ class RazorpayPaymentSheet extends StatefulWidget {
 }
 
 class _RazorpayPaymentSheetState extends State<RazorpayPaymentSheet> {
-  bool isProcessing = false;
-  String selectedMethod = 'upi';
+  late RazorpayService _razorpayService;
+  bool _isProcessing = true;
+  String _statusMessage = 'Initializing payment gateway...';
+  final themeController = Get.find<ThemeController>();
+
+  @override
+  void initState() {
+    super.initState();
+    _razorpayService = RazorpayService();
+    _initializePayment();
+  }
+
+  @override
+  void dispose() {
+    _razorpayService.dispose();
+    super.dispose();
+  }
+
+  /// Initialize and open Razorpay payment gateway
+  void _initializePayment() {
+    // Small delay to show initialization screen
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
+
+      setState(() {
+        _statusMessage = 'Opening secure payment gateway...';
+      });
+
+      // Open Razorpay checkout
+      _razorpayService.openCheckout(
+        amount: widget.amount,
+        orderId: widget.razorpayOrderId,
+        customerName: widget.customerName,
+        customerEmail: widget.customerEmail,
+        customerPhone: widget.customerPhone,
+        description: widget.description,
+        onSuccess: _handlePaymentSuccess,
+        onFailure: _handlePaymentError,
+        onWalletSelection: _handleExternalWallet,
+      );
+    });
+  }
+
+  /// Handle successful payment
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    if (!mounted) return;
+
+    setState(() {
+      _isProcessing = false;
+      _statusMessage = 'Payment successful!';
+    });
+
+    // Close this sheet and call success callback
+    Navigator.of(context).pop();
+    widget.onSuccess(response);
+  }
+
+  /// Handle payment failure
+  void _handlePaymentError(PaymentFailureResponse response) {
+    if (!mounted) return;
+
+    setState(() {
+      _isProcessing = false;
+      _statusMessage = 'Payment failed';
+    });
+
+    // Close this sheet and call failure callback
+    Navigator.of(context).pop();
+    widget.onFailure(response);
+  }
+
+  /// Handle external wallet selection
+  void _handleExternalWallet() {
+    if (!mounted) return;
+
+    setState(() {
+      _statusMessage = 'Redirecting to wallet...';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: isProcessing
-                ? _buildProcessingView()
-                : SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        _buildAmountSection(),
-                        const Divider(height: 1),
-                        _buildPaymentMethods(),
-                      ],
-                    ),
-                  ),
-          ),
-          if (!isProcessing) _buildPayButton(),
-        ],
+    return WillPopScope(
+      onWillPop: () async => !_isProcessing, // Prevent back during processing
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.4,
+        decoration: BoxDecoration(
+          color: themeController.isDarkMode
+              ? const Color(0xFF1E293B)
+              : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            _buildHeader(),
+            Expanded(child: _buildContent()),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildHeader() {
+    final primaryColor = themeController.getColor('primary');
+    final textColor = themeController.isDarkMode
+        ? Colors.white
+        : const Color(0xFF1E293B);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: themeController.isDarkMode
+            ? const Color(0xFF1E293B)
+            : Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -69,321 +162,136 @@ class _RazorpayPaymentSheetState extends State<RazorpayPaymentSheet> {
       ),
       child: Row(
         children: [
-          Image.asset(
-            'assets/images/razorpay_logo.png',
-            height: 24,
-            errorBuilder: (_, __, ___) => const Icon(
-              Icons.payment,
-              color: Color(0xFF3395FF),
-              size: 24,
-            ),
+          Icon(
+            Icons.payment,
+            color: primaryColor,
+            size: 24,
           ),
           const SizedBox(width: 8),
-          const Text(
-            'Razorpay',
+          Text(
+            'Razorpay Payment',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF3395FF),
+              color: primaryColor,
             ),
           ),
           const Spacer(),
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.close, color: Color(0xFF64748B)),
-          ),
+          if (!_isProcessing)
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: Icon(
+                Icons.close,
+                color: themeController.isDarkMode
+                    ? const Color(0xFF94A3B8)
+                    : const Color(0xFF64748B),
+              ),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildAmountSection() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'MediXpert Pharmacy',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Order #${widget.orderId}',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey[500],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Text(
-                'Amount to pay',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+  Widget _buildContent() {
+    final textColor = themeController.isDarkMode
+        ? Colors.white
+        : const Color(0xFF1E293B);
+    final subtextColor = themeController.isDarkMode
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
+    final primaryColor = themeController.getColor('primary');
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Animated loading indicator
+            SizedBox(
+              width: 64,
+              height: 64,
+              child: CircularProgressIndicator(
+                color: primaryColor,
+                strokeWidth: 4,
               ),
-              const Spacer(),
-              Text(
-                '₹${widget.amount.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1E293B),
+            ),
+            const SizedBox(height: 32),
+
+            // Amount display
+            Text(
+              '₹${widget.amount.toStringAsFixed(2)}',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                color: textColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Status message
+            Text(
+              _statusMessage,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: textColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+
+            // Instruction text
+            Text(
+              _isProcessing
+                  ? 'Please complete the payment in the Razorpay window'
+                  : 'You can close this window',
+              style: TextStyle(
+                fontSize: 14,
+                color: subtextColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            if (_isProcessing) ...[
+              const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  color: primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: primaryColor.withOpacity(0.2),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.security,
+                      size: 16,
+                      color: primaryColor,
+                    ),
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        'Secured by Razorpay',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: primaryColor,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaymentMethods() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Text(
-            'Select Payment Method',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[800],
-            ),
-          ),
-        ),
-        _buildPaymentOption(
-          'upi',
-          'UPI',
-          Icons.account_balance_wallet_outlined,
-          'Pay via any UPI app',
-        ),
-        _buildPaymentOption(
-          'card',
-          'Card',
-          Icons.credit_card,
-          'Credit / Debit / ATM Card',
-        ),
-        _buildPaymentOption(
-          'netbanking',
-          'Net Banking',
-          Icons.account_balance,
-          'Select your bank',
-        ),
-        _buildPaymentOption(
-          'wallet',
-          'Wallets',
-          Icons.wallet,
-          'Paytm, PhonePe, Amazon Pay',
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPaymentOption(
-      String value, String title, IconData icon, String subtitle) {
-    final isSelected = selectedMethod == value;
-    return InkWell(
-      onTap: () {
-        setState(() {
-          selectedMethod = value;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: Colors.grey[200]!),
-          ),
-          color: isSelected ? const Color(0xFF3395FF).withOpacity(0.05) : null,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? const Color(0xFF3395FF).withOpacity(0.1)
-                    : Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Icon(
-                icon,
-                color: isSelected ? const Color(0xFF3395FF) : Colors.grey[600],
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                color: Color(0xFF3395FF),
-                size: 24,
-              )
-            else
-              Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey[400]!, width: 2),
-                ),
-              ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildPayButton() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: ElevatedButton(
-            onPressed: _processPayment,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3395FF),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              elevation: 0,
-            ),
-            child: Text(
-              'Pay ₹${widget.amount.toStringAsFixed(2)}',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProcessingView() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const CircularProgressIndicator(
-            color: Color(0xFF3395FF),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            'Processing Payment...',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF1E293B),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Please do not press back or close the app',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _processPayment() {
-    setState(() {
-      isProcessing = true;
-    });
-
-    // Simulate payment processing
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        Navigator.pop(context);
-
-        // Show payment selection dialog
-        _showPaymentResultDialog();
-      }
-    });
-  }
-
-  void _showPaymentResultDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Simulate Payment Result'),
-        content: const Text(
-          'This is a dummy payment integration.\nChoose the result you want to simulate:',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              widget.onFailure();
-            },
-            child: const Text(
-              'Simulate Failure',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              widget.onSuccess();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-            ),
-            child: const Text('Simulate Success'),
-          ),
-        ],
       ),
     );
   }

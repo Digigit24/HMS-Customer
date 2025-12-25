@@ -204,4 +204,63 @@ class PharmacyController extends GetxController {
     }
     return null;
   }
+
+  /// Create Razorpay order on backend
+  ///
+  /// This should be called before initiating Razorpay payment
+  /// Returns order details including razorpay_order_id
+  Future<Map<String, dynamic>?> createRazorpayOrder({
+    required double amount,
+    String? notes,
+    String? voucherCode,
+  }) async {
+    isPlacingOrder.value = true;
+    try {
+      final orderData = await repo.createRazorpayOrder(
+        amount: amount,
+        notes: notes,
+        voucherCode: voucherCode,
+      );
+      return orderData;
+    } on ApiException catch (e) {
+      error.value = e.message;
+      AppToast.showError(e.message);
+      return null;
+    } finally {
+      isPlacingOrder.value = false;
+    }
+  }
+
+  /// Verify Razorpay payment and create order
+  ///
+  /// This should be called after successful Razorpay payment
+  /// to verify the payment on backend and create the pharmacy order
+  Future<PharmacyOrder?> verifyRazorpayPayment({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+    String? notes,
+    String? voucherCode,
+  }) async {
+    isPlacingOrder.value = true;
+    try {
+      final order = await repo.verifyRazorpayPayment(
+        razorpayOrderId: razorpayOrderId,
+        razorpayPaymentId: razorpayPaymentId,
+        razorpaySignature: razorpaySignature,
+        notes: notes,
+        voucherCode: voucherCode,
+      );
+      await loadCart(); // Refresh cart after order
+      await loadOrders(); // Refresh orders
+      AppToast.showSuccess('Order #${order.id} placed successfully');
+      return order;
+    } on ApiException catch (e) {
+      error.value = e.message;
+      AppToast.showError(e.message);
+      return null;
+    } finally {
+      isPlacingOrder.value = false;
+    }
+  }
 }

@@ -270,4 +270,71 @@ class PharmacyRepository {
       throw ApiException('Session expired. Please login again.', statusCode: 401);
     }
   }
+
+  /// Create Razorpay order on backend
+  ///
+  /// Returns order details including razorpay_order_id needed for payment
+  Future<Map<String, dynamic>> createRazorpayOrder({
+    required double amount,
+    String? notes,
+    String? voucherCode,
+  }) async {
+    try {
+      await _ensureAuthHeader();
+      final res = await dio.post(
+        '/api/pharmacy/razorpay/create-order/',
+        data: {
+          'amount': amount,
+          'notes': notes,
+          'voucher_code': voucherCode,
+        },
+        options: await _authOptions(),
+      );
+      return Map<String, dynamic>.from(res.data);
+    } on DioException catch (e) {
+      await _handleAuthError(e);
+      throw ApiException(
+        e.response?.data?.toString() ?? 'Failed to create Razorpay order',
+        statusCode: e.response?.statusCode,
+      );
+    }
+  }
+
+  /// Verify Razorpay payment on backend
+  ///
+  /// Parameters:
+  /// - [razorpayOrderId]: Order ID from Razorpay
+  /// - [razorpayPaymentId]: Payment ID from Razorpay
+  /// - [razorpaySignature]: Signature for verification
+  ///
+  /// Returns the created pharmacy order
+  Future<PharmacyOrder> verifyRazorpayPayment({
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+    String? notes,
+    String? voucherCode,
+  }) async {
+    try {
+      await _ensureAuthHeader();
+      final res = await dio.post(
+        '/api/pharmacy/razorpay/verify-payment/',
+        data: {
+          'razorpay_order_id': razorpayOrderId,
+          'razorpay_payment_id': razorpayPaymentId,
+          'razorpay_signature': razorpaySignature,
+          'notes': notes,
+          'voucher_code': voucherCode,
+        },
+        options: await _authOptions(),
+      );
+      return PharmacyOrder.fromJson(Map<String, dynamic>.from(res.data));
+    } on DioException catch (e) {
+      await _handleAuthError(e);
+      throw ApiException(
+        e.response?.data?.toString() ?? 'Failed to verify payment',
+        statusCode: e.response?.statusCode,
+      );
+    }
+  }
 }

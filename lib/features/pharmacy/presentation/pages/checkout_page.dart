@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/app_toast.dart';
+import '../../../../core/theme/theme_controller.dart';
 import '../../data/models/cart.dart';
 import '../controller/pharmacy_controller.dart';
 import '../widgets/razorpay_payment_sheet.dart';
@@ -19,6 +21,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
   final notesCtrl = TextEditingController();
   final double voucherDiscount = 50.0;
   String selectedPaymentMethod = 'razorpay'; // 'razorpay' or 'cod'
+  final themeController = Get.find<ThemeController>();
+
+  // TODO: Fetch these from user profile or backend
+  // For now using placeholder values
+  String get customerName => 'Customer';
+  String get customerEmail => 'customer@example.com';
+  String get customerPhone => '+919876543210';
 
   @override
   void initState() {
@@ -37,23 +46,30 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = themeController.isDarkMode
+        ? const Color(0xFF0F172A)
+        : Colors.white;
+    final textColor = themeController.isDarkMode
+        ? Colors.white
+        : const Color(0xFF1E293B);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bgColor,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF1E293B),
+        backgroundColor: bgColor,
+        foregroundColor: textColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () => Navigator.pop(context),
         ),
         titleSpacing: 0,
-        title: const Text(
+        title: Text(
           'Check Out',
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 18,
-            color: Color(0xFF1E293B),
+            color: textColor,
           ),
         ),
       ),
@@ -157,13 +173,20 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Widget _buildDeliveryInfoCard(PharmacyCart cart) {
+    final cardColor = themeController.isDarkMode
+        ? const Color(0xFF1E293B)
+        : Colors.white;
+    final borderColor = themeController.isDarkMode
+        ? const Color(0xFF334155)
+        : const Color(0xFFE2E8F0);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,14 +307,21 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Widget _buildVoucherSection() {
+    final cardColor = themeController.isDarkMode
+        ? const Color(0xFF1E293B)
+        : Colors.white;
+    final borderColor = themeController.isDarkMode
+        ? const Color(0xFF334155)
+        : const Color(0xFFE2E8F0);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(color: borderColor),
         ),
         child: Row(
           children: [
@@ -344,6 +374,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
     final paymentIcon = selectedPaymentMethod == 'razorpay'
         ? Icons.payment
         : Icons.money;
+    final cardColor = themeController.isDarkMode
+        ? const Color(0xFF1E293B)
+        : Colors.white;
+    final borderColor = themeController.isDarkMode
+        ? const Color(0xFF334155)
+        : const Color(0xFFE2E8F0);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -353,9 +389,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: cardColor,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            border: Border.all(color: borderColor),
           ),
           child: Row(
             children: [
@@ -394,25 +430,35 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Widget _buildNotesSection() {
+    final textColor = themeController.isDarkMode
+        ? Colors.white
+        : const Color(0xFF1E293B);
+    final inputBgColor = themeController.isDarkMode
+        ? const Color(0xFF1E293B)
+        : const Color(0xFFF8FAFC);
+    final borderColor = themeController.isDarkMode
+        ? const Color(0xFF334155)
+        : const Color(0xFFE2E8F0);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Notes for MediXpert',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1E293B),
+              color: textColor,
             ),
           ),
           const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: inputBgColor,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              border: Border.all(color: borderColor),
             ),
             child: TextField(
               controller: notesCtrl,
@@ -441,15 +487,21 @@ class _CheckoutPageState extends State<CheckoutPage> {
   Widget _buildSummary(PharmacyCart cart) {
     final totalDeal = cart.totalAmount;
     final total = totalDeal - voucherDiscount;
+    final cardColor = themeController.isDarkMode
+        ? const Color(0xFF1E293B)
+        : const Color(0xFFF8FAFC);
+    final borderColor = themeController.isDarkMode
+        ? const Color(0xFF334155)
+        : const Color(0xFFE2E8F0);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
+          color: cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(color: borderColor),
         ),
         child: Column(
           children: [
@@ -494,10 +546,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Widget _buildBottomBar() {
+    final bgColor = themeController.isDarkMode
+        ? const Color(0xFF1E293B)
+        : Colors.white;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: bgColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -583,9 +639,16 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   void _showPaymentMethodSelector() {
+    final bgColor = themeController.isDarkMode
+        ? const Color(0xFF1E293B)
+        : Colors.white;
+    final textColor = themeController.isDarkMode
+        ? Colors.white
+        : const Color(0xFF1E293B);
+
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: bgColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -595,12 +658,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Select Payment Method',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1E293B),
+                color: textColor,
               ),
             ),
             const SizedBox(height: 20),
@@ -727,7 +790,27 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     // Check payment method
     if (selectedPaymentMethod == 'razorpay') {
-      // Show Razorpay payment sheet for online payment
+      // Create Razorpay order on backend first
+      final razorpayOrderData = await widget.controller.createRazorpayOrder(
+        amount: total,
+        notes: notesCtrl.text.trim(),
+        voucherCode: 'MEDIXPERT',
+      );
+
+      if (razorpayOrderData == null) {
+        AppToast.showError('Failed to create payment order');
+        return;
+      }
+
+      // Extract Razorpay order ID from response
+      final razorpayOrderId = razorpayOrderData['razorpay_order_id'] as String?;
+      if (razorpayOrderId == null || razorpayOrderId.isEmpty) {
+        AppToast.showError('Invalid payment order ID');
+        return;
+      }
+
+      // Show Razorpay payment sheet
+      if (!mounted) return;
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -735,21 +818,53 @@ class _CheckoutPageState extends State<CheckoutPage> {
         isDismissible: false,
         builder: (context) => RazorpayPaymentSheet(
           amount: total,
-          orderId: DateTime.now().millisecondsSinceEpoch.toString(),
-          onSuccess: () => _handlePaymentSuccess(),
-          onFailure: () => _handlePaymentFailure(),
+          razorpayOrderId: razorpayOrderId,
+          customerName: customerName,
+          customerEmail: customerEmail,
+          customerPhone: customerPhone,
+          description: 'Order for ${cart.totalItems} items',
+          onSuccess: (response) => _handleRazorpaySuccess(response),
+          onFailure: (response) => _handleRazorpayFailure(response),
         ),
       );
     } else {
       // Cash on Delivery - create order directly
-      _handlePaymentSuccess();
+      _handleCODOrder();
     }
   }
 
-  Future<void> _handlePaymentSuccess() async {
-    // Payment successful, create the order
+  /// Handle successful Razorpay payment
+  Future<void> _handleRazorpaySuccess(PaymentSuccessResponse response) async {
+    // Verify payment on backend and create order
+    final order = await widget.controller.verifyRazorpayPayment(
+      razorpayOrderId: response.orderId ?? '',
+      razorpayPaymentId: response.paymentId ?? '',
+      razorpaySignature: response.signature ?? '',
+      notes: notesCtrl.text.trim(),
+      voucherCode: 'MEDIXPERT',
+    );
+
+    if (order == null) {
+      AppToast.showError('Payment verification failed');
+      return;
+    }
+
+    // Navigate to success page
+    if (mounted) {
+      Get.off(() => OrderSuccessPage(order: order));
+    }
+  }
+
+  /// Handle Razorpay payment failure
+  void _handleRazorpayFailure(PaymentFailureResponse response) {
+    final errorMsg = response.message ?? 'Payment failed';
+    AppToast.showError(errorMsg);
+  }
+
+  /// Handle Cash on Delivery order
+  Future<void> _handleCODOrder() async {
     final order = await widget.controller.checkout(
-      notes: notesCtrl.text,
+      notes: notesCtrl.text.trim(),
       voucherCode: 'MEDIXPERT',
     );
 
@@ -762,10 +877,5 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     // Navigate to success page
     Get.off(() => OrderSuccessPage(order: order));
-  }
-
-  void _handlePaymentFailure() {
-    // Payment failed
-    AppToast.showError('Payment failed. Please try again.');
   }
 }
