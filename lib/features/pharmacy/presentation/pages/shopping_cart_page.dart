@@ -443,25 +443,17 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
     );
   }
 
-  Future<void> _incrementItem(PharmacyCartItem item) async {
-    final ok = await widget.controller.incrementItem(item.product);
-    if (ok) {
-      await widget.controller.loadCart();
-    }
+  void _incrementItem(PharmacyCartItem item) {
+    widget.controller.incrementItem(item.product);
   }
 
-  Future<void> _decrementItem(PharmacyCartItem item) async {
-    final ok = await widget.controller.decrementItem(item.product);
-    if (ok) {
-      await widget.controller.loadCart();
-    }
+  void _decrementItem(PharmacyCartItem item) {
+    widget.controller.decrementItem(item.product);
   }
 
-  Future<void> _removeItem(PharmacyCartItem item) async {
+  void _removeItem(PharmacyCartItem item) {
     for (var i = 0; i < item.quantity; i++) {
-      final ok = await widget.controller.decrementItem(item.product);
-      if (!ok) break;
+      widget.controller.decrementItem(item.product);
     }
-    await widget.controller.loadCart();
   }
 }

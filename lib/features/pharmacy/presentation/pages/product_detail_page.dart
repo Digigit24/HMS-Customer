@@ -657,13 +657,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             child: ElevatedButton(
               onPressed: isLoading
                   ? null
-                  : () async {
+                  : () {
                       if (qty == 0) {
-                        final ok =
-                            await widget.controller.addToCart(widget.product);
-                        if (ok) {
-                          AppToast.showSuccess('Added to cart');
-                        }
+                        widget.controller.addToCart(widget.product);
                       } else {
                         // Navigate to cart
                         Navigator.pop(context);
