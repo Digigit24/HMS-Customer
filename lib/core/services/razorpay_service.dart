@@ -62,29 +62,6 @@ class RazorpayService {
       'theme': {
         'color': '#${RazorpayConfig.themeColor}',
       },
-      'modal': {
-        'ondismiss': () {
-          log('Razorpay checkout dismissed');
-        }
-      },
-      'retry': {
-        'enabled': RazorpayConfig.retryEnabled,
-        'max_count': RazorpayConfig.maxRetryAttempts,
-      },
-      'config': {
-        'display': {
-          'blocks': {
-            'utib': {
-              'name': 'Pay using Razorpay',
-              'instruments': _buildInstrumentsList(),
-            }
-          },
-          'sequence': ['block.utib'],
-          'preferences': {
-            'show_default_blocks': true,
-          }
-        }
-      }
     };
 
     // Add company logo if available
