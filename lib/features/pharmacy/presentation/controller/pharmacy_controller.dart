@@ -72,6 +72,13 @@ class PharmacyController extends GetxController {
   }
 
   Future<bool> addToCart(PharmacyProduct product) async {
+    // Store previous cart for rollback
+    final previousCart = cart.value;
+
+    // Optimistic UI update
+    final optimisticCart = _createOptimisticCartForAdd(product);
+    cart.value = optimisticCart;
+
     try {
       final updated = await repo.addItem(
         productId: product.id,
@@ -81,6 +88,8 @@ class PharmacyController extends GetxController {
       AppToast.showSuccess('${product.productName} added to cart');
       return true;
     } on ApiException catch (e) {
+      // Rollback on error
+      cart.value = previousCart;
       error.value = e.message;
       AppToast.showError(e.message);
       return false;
@@ -93,7 +102,16 @@ class PharmacyController extends GetxController {
     if (existingItem == null) {
       return addToCart(product);
     }
+
+    // Store previous cart for rollback
+    final previousCart = cart.value;
+
     final newQty = currentQty + 1;
+
+    // Optimistic UI update
+    final optimisticCart = _createOptimisticCartForUpdate(product.id, newQty);
+    cart.value = optimisticCart;
+
     try {
       final updated = await repo.updateItem(
         cartItemId: existingItem.id,
@@ -103,6 +121,8 @@ class PharmacyController extends GetxController {
       AppToast.showSuccess('Updated ${product.productName} to $newQty');
       return true;
     } on ApiException catch (e) {
+      // Rollback on error
+      cart.value = previousCart;
       error.value = e.message;
       AppToast.showError(e.message);
       return false;
@@ -113,7 +133,17 @@ class PharmacyController extends GetxController {
     final existingItem = _findCartItem(product.id);
     if (existingItem == null) return false;
 
+    // Store previous cart for rollback
+    final previousCart = cart.value;
+
     final newQty = existingItem.quantity - 1;
+
+    // Optimistic UI update
+    final optimisticCart = newQty <= 0
+        ? _createOptimisticCartForRemove(product.id)
+        : _createOptimisticCartForUpdate(product.id, newQty);
+    cart.value = optimisticCart;
+
     try {
       if (newQty <= 0) {
         final updated =
@@ -130,6 +160,8 @@ class PharmacyController extends GetxController {
       }
       return true;
     } on ApiException catch (e) {
+      // Rollback on error
+      cart.value = previousCart;
       error.value = e.message;
       AppToast.showError(e.message);
       return false;
@@ -203,6 +235,109 @@ class PharmacyController extends GetxController {
       if (item.product.id == productId) return item;
     }
     return null;
+  }
+
+  /// Create optimistic cart when adding a new product
+  PharmacyCart _createOptimisticCartForAdd(PharmacyProduct product) {
+    final currentCart = cart.value;
+    final price = product.sellingPrice ?? product.mrp ?? 0;
+
+    // Create new cart item
+    final newItem = PharmacyCartItem(
+      id: -1, // Temporary ID
+      product: product,
+      quantity: 1,
+      priceAtTime: price,
+      totalPrice: price,
+    );
+
+    if (currentCart == null) {
+      // Create new cart
+      return PharmacyCart(
+        id: -1, // Temporary ID
+        cartItems: [newItem],
+        totalItems: 1,
+        totalAmount: price,
+      );
+    } else {
+      // Add to existing cart
+      final updatedItems = [...currentCart.cartItems, newItem];
+      return PharmacyCart(
+        id: currentCart.id,
+        userId: currentCart.userId,
+        cartItems: updatedItems,
+        totalItems: currentCart.totalItems + 1,
+        totalAmount: currentCart.totalAmount + price,
+        createdAt: currentCart.createdAt,
+        updatedAt: DateTime.now(),
+      );
+    }
+  }
+
+  /// Create optimistic cart when updating quantity
+  PharmacyCart? _createOptimisticCartForUpdate(int productId, int newQuantity) {
+    final currentCart = cart.value;
+    if (currentCart == null) return null;
+
+    final updatedItems = currentCart.cartItems.map((item) {
+      if (item.product.id == productId) {
+        final price = item.priceAtTime ?? item.product.sellingPrice ?? item.product.mrp ?? 0;
+        return PharmacyCartItem(
+          id: item.id,
+          product: item.product,
+          quantity: newQuantity,
+          priceAtTime: price,
+          totalPrice: price * newQuantity,
+        );
+      }
+      return item;
+    }).toList();
+
+    final totalItems = updatedItems.fold<int>(0, (sum, item) => sum + item.quantity);
+    final totalAmount = updatedItems.fold<double>(0, (sum, item) => sum + (item.totalPrice ?? 0));
+
+    return PharmacyCart(
+      id: currentCart.id,
+      userId: currentCart.userId,
+      cartItems: updatedItems,
+      totalItems: totalItems,
+      totalAmount: totalAmount,
+      createdAt: currentCart.createdAt,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  /// Create optimistic cart when removing a product
+  PharmacyCart? _createOptimisticCartForRemove(int productId) {
+    final currentCart = cart.value;
+    if (currentCart == null) return null;
+
+    final updatedItems = currentCart.cartItems.where((item) => item.product.id != productId).toList();
+
+    if (updatedItems.isEmpty) {
+      return PharmacyCart(
+        id: currentCart.id,
+        userId: currentCart.userId,
+        cartItems: [],
+        totalItems: 0,
+        totalAmount: 0,
+        createdAt: currentCart.createdAt,
+        updatedAt: DateTime.now(),
+      );
+    }
+
+    final totalItems = updatedItems.fold<int>(0, (sum, item) => sum + item.quantity);
+    final totalAmount = updatedItems.fold<double>(0, (sum, item) => sum + (item.totalPrice ?? 0));
+
+    return PharmacyCart(
+      id: currentCart.id,
+      userId: currentCart.userId,
+      cartItems: updatedItems,
+      totalItems: totalItems,
+      totalAmount: totalAmount,
+      createdAt: currentCart.createdAt,
+      updatedAt: DateTime.now(),
+    );
   }
 
   /// Create Razorpay order on backend

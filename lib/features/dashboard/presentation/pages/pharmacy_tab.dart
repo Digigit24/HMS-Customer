@@ -215,7 +215,6 @@ class _PharmacyTabState extends State<PharmacyTab> {
   Widget _buildProductCard(PharmacyProduct product) {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
-    final qty = controller.getQuantity(product.id);
     final price = product.sellingPrice ?? product.mrp ?? 0;
     final originalPrice = product.mrp ?? price;
     final discount = originalPrice > price
@@ -373,6 +372,102 @@ class _PharmacyTabState extends State<PharmacyTab> {
                 ),
               ),
             ),
+            // Add to Cart button
+            Obx(() {
+              final qty = controller.getQuantity(product.id);
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  context.padding(12),
+                  0,
+                  context.padding(12),
+                  context.padding(12),
+                ),
+                child: qty == 0
+                    ? SizedBox(
+                        width: double.infinity,
+                        height: 36,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await controller.addToCart(product);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryColor,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.zero,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Text(
+                            'Add to Cart',
+                            style: TextStyle(
+                              fontSize: context.fontSize(13),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Container(
+                        height: 36,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: primaryColor, width: 1.5),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            InkWell(
+                              onTap: () async {
+                                await controller.decrementItem(product);
+                              },
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(8),
+                                bottomLeft: Radius.circular(8),
+                              ),
+                              child: Container(
+                                width: 36,
+                                height: 36,
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  Icons.remove,
+                                  size: context.iconSize(18),
+                                  color: primaryColor,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              qty.toString(),
+                              style: TextStyle(
+                                fontSize: context.fontSize(14),
+                                fontWeight: FontWeight.w600,
+                                color: primaryColor,
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () async {
+                                await controller.incrementItem(product);
+                              },
+                              borderRadius: const BorderRadius.only(
+                                topRight: Radius.circular(8),
+                                bottomRight: Radius.circular(8),
+                              ),
+                              child: Container(
+                                width: 36,
+                                height: 36,
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  Icons.add,
+                                  size: context.iconSize(18),
+                                  color: primaryColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+              );
+            }),
           ],
         ),
       ),
