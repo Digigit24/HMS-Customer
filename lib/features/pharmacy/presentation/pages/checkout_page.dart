@@ -790,26 +790,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     // Check payment method
     if (selectedPaymentMethod == 'razorpay') {
-      // Create Razorpay order on backend first
-      final razorpayOrderData = await widget.controller.createRazorpayOrder(
-        amount: total,
-        notes: notesCtrl.text.trim(),
-        voucherCode: 'MEDIXPERT',
-      );
-
-      if (razorpayOrderData == null) {
-        AppToast.showError('Failed to create payment order');
-        return;
-      }
-
-      // Extract Razorpay order ID from response
-      final razorpayOrderId = razorpayOrderData['razorpay_order_id'] as String?;
-      if (razorpayOrderId == null || razorpayOrderId.isEmpty) {
-        AppToast.showError('Invalid payment order ID');
-        return;
-      }
-
-      // Show Razorpay payment sheet
+      // Direct Razorpay integration - No backend order creation
       if (!mounted) return;
       showModalBottomSheet(
         context: context,
@@ -818,7 +799,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
         isDismissible: false,
         builder: (context) => RazorpayPaymentSheet(
           amount: total,
-          razorpayOrderId: razorpayOrderId,
           customerName: customerName,
           customerEmail: customerEmail,
           customerPhone: customerPhone,
@@ -835,17 +815,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   /// Handle successful Razorpay payment
   Future<void> _handleRazorpaySuccess(PaymentSuccessResponse response) async {
-    // Verify payment on backend and create order
-    final order = await widget.controller.verifyRazorpayPayment(
-      razorpayOrderId: response.orderId ?? '',
-      razorpayPaymentId: response.paymentId ?? '',
-      razorpaySignature: response.signature ?? '',
-      notes: notesCtrl.text.trim(),
+    // Payment successful - create order in backend
+    // Note: In production, verify payment signature on backend
+    AppToast.showSuccess('Payment successful: ${response.paymentId}');
+
+    // Create order after successful payment
+    final order = await widget.controller.checkout(
+      notes: 'Razorpay Payment ID: ${response.paymentId}\n${notesCtrl.text.trim()}',
       voucherCode: 'MEDIXPERT',
     );
 
     if (order == null) {
-      AppToast.showError('Payment verification failed');
+      AppToast.showError('Failed to create order after payment');
       return;
     }
 

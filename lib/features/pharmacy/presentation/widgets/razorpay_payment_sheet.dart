@@ -4,16 +4,17 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../../../core/services/razorpay_service.dart';
 import '../../../../core/theme/theme_controller.dart';
 
-/// Razorpay Payment Sheet Widget
+/// Razorpay Payment Sheet Widget (Direct Integration)
 ///
-/// This widget handles the Razorpay payment flow:
+/// This widget handles the Razorpay payment flow without backend order creation:
 /// 1. Displays payment processing UI
-/// 2. Initiates Razorpay checkout
+/// 2. Initiates Razorpay checkout directly
 /// 3. Handles payment success/failure callbacks
 /// 4. Supports dark/light mode themes
+///
+/// Note: Uses direct Razorpay integration - no backend order ID required
 class RazorpayPaymentSheet extends StatefulWidget {
   final double amount;
-  final String razorpayOrderId;
   final String customerName;
   final String customerEmail;
   final String customerPhone;
@@ -24,7 +25,6 @@ class RazorpayPaymentSheet extends StatefulWidget {
   const RazorpayPaymentSheet({
     super.key,
     required this.amount,
-    required this.razorpayOrderId,
     required this.customerName,
     required this.customerEmail,
     required this.customerPhone,
@@ -66,10 +66,9 @@ class _RazorpayPaymentSheetState extends State<RazorpayPaymentSheet> {
         _statusMessage = 'Opening secure payment gateway...';
       });
 
-      // Open Razorpay checkout
+      // Open Razorpay checkout (Direct Integration - No Backend Order)
       _razorpayService.openCheckout(
         amount: widget.amount,
-        orderId: widget.razorpayOrderId,
         customerName: widget.customerName,
         customerEmail: widget.customerEmail,
         customerPhone: widget.customerPhone,

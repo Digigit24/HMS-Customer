@@ -16,11 +16,10 @@ class RazorpayService {
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
   }
 
-  /// Initialize payment with Razorpay
+  /// Initialize payment with Razorpay (Direct Integration - No Backend Order)
   ///
   /// Parameters:
   /// - [amount]: Amount in INR (will be converted to paise automatically)
-  /// - [orderId]: Razorpay order ID from backend
   /// - [customerName]: Customer's name
   /// - [customerEmail]: Customer's email
   /// - [customerPhone]: Customer's phone number
@@ -28,9 +27,11 @@ class RazorpayService {
   /// - [onSuccess]: Callback when payment succeeds
   /// - [onFailure]: Callback when payment fails
   /// - [onWalletSelection]: Callback when external wallet is selected
+  ///
+  /// Note: This uses direct Razorpay integration without backend order creation.
+  /// For production, consider using backend order creation for better security.
   void openCheckout({
     required double amount,
-    required String orderId,
     required String customerName,
     required String customerEmail,
     required String customerPhone,
@@ -49,7 +50,6 @@ class RazorpayService {
     var options = {
       'key': RazorpayConfig.keyId,
       'amount': amountInPaise,
-      'order_id': orderId,
       'name': RazorpayConfig.companyName,
       'description': description ?? RazorpayConfig.companyDescription,
       'timeout': RazorpayConfig.timeoutDuration,
