@@ -32,7 +32,7 @@ class AppointmentCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -58,8 +58,8 @@ class AppointmentCard extends StatelessWidget {
               children: [
                 // Doctor Image
                 Container(
-                  width: 56,
-                  height: 56,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(AppRadius.md),
@@ -76,7 +76,7 @@ class AppointmentCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 // Doctor Info
                 Expanded(
                   child: Column(
@@ -87,15 +87,15 @@ class AppointmentCard extends StatelessWidget {
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
-                          fontSize: 17,
+                          fontSize: 15,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Text(
                         specialty,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: Colors.white.withOpacity(0.9),
-                          fontSize: 14,
+                          fontSize: 12,
                         ),
                       ),
                     ],
@@ -106,8 +106,8 @@ class AppointmentCard extends StatelessWidget {
                   onTap: onMessageTap,
                   borderRadius: BorderRadius.circular(AppRadius.full),
                   child: Container(
-                    width: 40,
-                    height: 40,
+                    width: 36,
+                    height: 36,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.25),
                       shape: BoxShape.circle,
@@ -115,20 +115,20 @@ class AppointmentCard extends StatelessWidget {
                     child: const Icon(
                       Icons.chat_bubble_outline,
                       color: Colors.white,
-                      size: 20,
+                      size: 18,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 14),
             // Appointment Details
             Row(
               children: [
                 // Date
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(AppRadius.sm),
@@ -138,26 +138,29 @@ class AppointmentCard extends StatelessWidget {
                         const Icon(
                           Icons.calendar_today,
                           color: Colors.white,
-                          size: 16,
+                          size: 14,
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          date,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            date,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 11,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 // Time
                 Expanded(
                   child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(AppRadius.sm),
@@ -167,15 +170,18 @@ class AppointmentCard extends StatelessWidget {
                         const Icon(
                           Icons.access_time,
                           color: Colors.white,
-                          size: 16,
+                          size: 14,
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          time,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13,
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            time,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 11,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],

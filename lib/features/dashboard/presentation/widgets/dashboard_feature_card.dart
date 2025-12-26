@@ -30,7 +30,7 @@ class DashboardFeatureCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -51,8 +51,8 @@ class DashboardFeatureCard extends StatelessWidget {
           children: [
             // Icon
             Container(
-              width: 56,
-              height: 56,
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
                 color: iconBackgroundColor.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(AppRadius.md),
@@ -60,25 +60,25 @@ class DashboardFeatureCard extends StatelessWidget {
               child: Icon(
                 icon,
                 color: iconColor,
-                size: 28,
+                size: 22,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             // Title
             Text(
               title,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                fontSize: 16,
+                fontSize: 14,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             // Subtitle
             Text(
               subtitle,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 13,
+                fontSize: 11,
               ),
             ),
           ],

@@ -29,7 +29,7 @@ class InfoBanner extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.centerLeft,
@@ -59,35 +59,35 @@ class InfoBanner extends StatelessWidget {
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
-                      fontSize: 16,
+                      fontSize: 14,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Row(
                     children: [
                       Text(
                         subtitle,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: Colors.white.withOpacity(0.95),
-                          fontSize: 14,
+                          fontSize: 12,
                         ),
                       ),
                       const SizedBox(width: 4),
                       const Icon(
                         Icons.arrow_forward,
                         color: Colors.white,
-                        size: 16,
+                        size: 14,
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 12),
             Icon(
               icon,
               color: iconColor,
-              size: 64,
+              size: 48,
             ),
           ],
         ),

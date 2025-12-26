@@ -38,11 +38,11 @@ class _HomeTabState extends State<HomeTab> {
           isDark ? const Color(0xFF0F172A) : const Color(0xFFF8F9FA),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: context.padding(20)),
+          padding: EdgeInsets.symmetric(horizontal: context.padding(16)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: context.spacing(24)),
+              SizedBox(height: context.spacing(16)),
 
               // Header - Greeting
               FadeInDown(
@@ -54,22 +54,22 @@ class _HomeTabState extends State<HomeTab> {
                       'Hi Dwiky!',
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
-                        fontSize: context.fontSize(24),
+                        fontSize: context.fontSize(20),
                       ),
                     ),
-                    SizedBox(height: context.spacing(6)),
+                    SizedBox(height: context.spacing(4)),
                     Text(
                       'May you always in a good condition',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
-                        fontSize: context.fontSize(14),
+                        fontSize: context.fontSize(13),
                       ),
                     ),
                   ],
                 ),
               ),
 
-              SizedBox(height: context.spacing(24)),
+              SizedBox(height: context.spacing(16)),
 
               // Search Bar with Filter
               FadeInDown(
@@ -84,7 +84,7 @@ class _HomeTabState extends State<HomeTab> {
                 ),
               ),
 
-              SizedBox(height: context.spacing(28)),
+              SizedBox(height: context.spacing(16)),
 
               // Upcoming Appointment Card
               FadeInUp(
@@ -105,7 +105,7 @@ class _HomeTabState extends State<HomeTab> {
                 ),
               ),
 
-              SizedBox(height: context.spacing(28)),
+              SizedBox(height: context.spacing(16)),
 
               // Feature Cards Grid
               FadeInUp(
@@ -115,9 +115,9 @@ class _HomeTabState extends State<HomeTab> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: 2,
-                  crossAxisSpacing: context.spacing(16),
-                  mainAxisSpacing: context.spacing(16),
-                  childAspectRatio: 1.0,
+                  crossAxisSpacing: context.spacing(12),
+                  mainAxisSpacing: context.spacing(12),
+                  childAspectRatio: 1.1,
                   children: [
                     // Book an Appointment
                     DashboardFeatureCard(
@@ -167,7 +167,7 @@ class _HomeTabState extends State<HomeTab> {
                 ),
               ),
 
-              SizedBox(height: context.spacing(28)),
+              SizedBox(height: context.spacing(16)),
 
               // Info Banner - COVID Prevention
               FadeInUp(
@@ -185,7 +185,7 @@ class _HomeTabState extends State<HomeTab> {
                 ),
               ),
 
-              SizedBox(height: context.spacing(32)),
+              SizedBox(height: context.spacing(20)),
             ],
           ),
         ),
