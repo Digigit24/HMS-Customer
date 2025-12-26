@@ -344,19 +344,19 @@ class _PharmacyTabState extends State<PharmacyTab> {
                         Icon(
                           Icons.inventory_2_outlined,
                           size: context.iconSize(12),
-                          color: product.quantity < 10
+                          color: (product.quantity ?? 0) < 10
                               ? Colors.red
                               : theme.colorScheme.onSurfaceVariant,
                         ),
                         SizedBox(width: context.spacing(4)),
                         Text(
-                          '${product.quantity} in stock',
+                          '${product.quantity ?? 0} in stock',
                           style: TextStyle(
                             fontSize: context.fontSize(11),
-                            color: product.quantity < 10
+                            color: (product.quantity ?? 0) < 10
                                 ? Colors.red
                                 : theme.colorScheme.onSurfaceVariant,
-                            fontWeight: product.quantity < 10
+                            fontWeight: (product.quantity ?? 0) < 10
                                 ? FontWeight.w600
                                 : FontWeight.normal,
                           ),

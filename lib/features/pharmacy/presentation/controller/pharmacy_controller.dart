@@ -88,8 +88,8 @@ class PharmacyController extends GetxController {
     final currentQty = localCartItems[product.id] ?? 0;
     final newQty = currentQty + 1;
 
-    if (newQty > product.quantity) {
-      AppToast.showError('Only ${product.quantity} items available in stock');
+    if (newQty > (product.quantity ?? 0)) {
+      AppToast.showError('Only ${product.quantity ?? 0} items available in stock');
       return;
     }
 
@@ -103,8 +103,8 @@ class PharmacyController extends GetxController {
     final currentQty = localCartItems[product.id] ?? 0;
     final newQty = currentQty + 1;
 
-    if (newQty > product.quantity) {
-      AppToast.showError('Only ${product.quantity} items available in stock');
+    if (newQty > (product.quantity ?? 0)) {
+      AppToast.showError('Only ${product.quantity ?? 0} items available in stock');
       return;
     }
 
