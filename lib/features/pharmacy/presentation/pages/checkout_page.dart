@@ -798,22 +798,24 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
     // Check payment method
     if (selectedPaymentMethod == 'razorpay') {
-      // Direct Razorpay integration - No backend order creation
-      if (!mounted) return;
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        isDismissible: false,
-        builder: (context) => RazorpayPaymentSheet(
-          amount: total,
-          customerName: customerName,
-          customerEmail: customerEmail,
-          customerPhone: customerPhone,
-          description: 'Order for ${cart.totalItems} items',
-          onSuccess: (response) => _handleRazorpaySuccess(response),
-          onFailure: (response) => _handleRazorpayFailure(response),
-        ),
+      // NEW: Unified Razorpay integration with backend order creation
+      await widget.controller.processPharmacyPaymentUnified(
+        notes: notesCtrl.text.trim(),
+        onSuccess: (verificationResponse) {
+          // Payment successful!
+          AppToast.showSuccess('Payment successful!');
+
+          // Navigate to success page
+          if (mounted) {
+            Get.off(() => OrderSuccessPage(
+              order: null, // Order will be loaded from the response
+            ));
+          }
+        },
+        onFailure: (error) {
+          // Payment failed
+          AppToast.showError(error);
+        },
       );
     } else {
       // Cash on Delivery - create order directly
