@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../../core/theme/theme_constants.dart';
+import '../../../../core/utils/responsive_utils.dart';
 
 class DashboardFeatureCard extends StatelessWidget {
   final IconData icon;
@@ -25,12 +26,18 @@ class DashboardFeatureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Responsive sizing based on screen width (minimum 360px)
+    final isSmallScreen = screenWidth < 375;
+    final iconSize = isSmallScreen ? 40.0 : 48.0;
+    final iconContainerSize = isSmallScreen ? 44.0 : 52.0;
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(context.padding(12)),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -48,11 +55,12 @@ class DashboardFeatureCard extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             // Icon
             Container(
-              width: 56,
-              height: 56,
+              width: iconContainerSize,
+              height: iconContainerSize,
               decoration: BoxDecoration(
                 color: iconBackgroundColor.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(AppRadius.md),
@@ -60,25 +68,40 @@ class DashboardFeatureCard extends StatelessWidget {
               child: Icon(
                 icon,
                 color: iconColor,
-                size: 28,
+                size: iconSize * 0.6,
               ),
             ),
-            const SizedBox(height: 16),
-            // Title
-            Text(
-              title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 4),
-            // Subtitle
-            Text(
-              subtitle,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 13,
+            SizedBox(height: context.spacing(8)),
+            // Title and Subtitle with flexible spacing
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // Title
+                  Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: context.fontSize(14),
+                      height: 1.2,
+                    ),
+                  ),
+                  SizedBox(height: context.spacing(4)),
+                  // Subtitle
+                  Text(
+                    subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: context.fontSize(11),
+                      height: 1.3,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

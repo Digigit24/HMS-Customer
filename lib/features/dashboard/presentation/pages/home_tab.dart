@@ -115,52 +115,52 @@ class _HomeTabState extends State<HomeTab> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: 2,
-                  crossAxisSpacing: context.spacing(16),
-                  mainAxisSpacing: context.spacing(16),
-                  childAspectRatio: 1.0,
+                  crossAxisSpacing: context.spacing(14),
+                  mainAxisSpacing: context.spacing(14),
+                  childAspectRatio: 0.95,
                   children: [
-                    // Book an Appointment
+                    // Book Appointment
                     DashboardFeatureCard(
-                      icon: Icons.event_note,
+                      icon: Icons.calendar_today,
                       iconBackgroundColor: const Color(0xFF6366F1),
                       iconColor: const Color(0xFF6366F1),
-                      title: 'Book an\nAppointment',
-                      subtitle: 'Find a Doctor or\nspecialist',
+                      title: 'Book Appointment',
+                      subtitle: 'Schedule with doctor',
                       onTap: () {
                         // TODO: Navigate to booking
                       },
                     ),
-                    // Appointment with QR
+                    // Appointment History
                     DashboardFeatureCard(
-                      icon: Icons.qr_code_2,
+                      icon: Icons.history,
                       iconBackgroundColor: const Color(0xFF10B981),
                       iconColor: const Color(0xFF10B981),
-                      title: 'Appointment\nwith QR',
-                      subtitle: 'Queuing without the\nhustle',
+                      title: 'Appointment History',
+                      subtitle: 'View past visits',
                       onTap: () {
-                        // TODO: Navigate to QR scanner
+                        // TODO: Navigate to appointment history
                       },
                     ),
-                    // Request Consultation
-                    DashboardFeatureCard(
-                      icon: Icons.headset_mic,
-                      iconBackgroundColor: const Color(0xFFF97316),
-                      iconColor: const Color(0xFFF97316),
-                      title: 'Request\nConsultation',
-                      subtitle: 'Talk to specialist',
-                      onTap: () {
-                        // TODO: Navigate to consultation
-                      },
-                    ),
-                    // Locate a Pharmacy
+                    // Pharmacy
                     DashboardFeatureCard(
                       icon: Icons.local_pharmacy,
+                      iconBackgroundColor: const Color(0xFFF97316),
+                      iconColor: const Color(0xFFF97316),
+                      title: 'Pharmacy',
+                      subtitle: 'Order medicines',
+                      onTap: () {
+                        // TODO: Navigate to pharmacy
+                      },
+                    ),
+                    // Order History
+                    DashboardFeatureCard(
+                      icon: Icons.receipt_long,
                       iconBackgroundColor: const Color(0xFFEC4899),
                       iconColor: const Color(0xFFEC4899),
-                      title: 'Locate a\nPharmacy',
-                      subtitle: 'Purchase Medicines',
+                      title: 'Order History',
+                      subtitle: 'Track your orders',
                       onTap: () {
-                        // TODO: Navigate to pharmacy locator
+                        // TODO: Navigate to order history
                       },
                     ),
                   ],
