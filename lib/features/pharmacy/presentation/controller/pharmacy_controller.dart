@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 
 import '../../../../core/network/api_exceptions.dart';
 import '../../../../core/utils/app_toast.dart';
+import '../../../../core/services/payment_service.dart';
+import '../../../../core/data/models/razorpay_order.dart';
 import '../../data/models/cart.dart';
 import '../../data/models/category.dart';
 import '../../data/models/order.dart';
@@ -321,6 +323,87 @@ class PharmacyController extends GetxController {
       return null;
     } finally {
       isPlacingOrder.value = false;
+    }
+  }
+
+  /// Process Pharmacy Payment with Unified Payment Service
+  ///
+  /// This method uses the new unified payment API that works across all service types.
+  /// It handles the complete payment flow:
+  /// 1. Create order on backend
+  /// 2. Open Razorpay checkout
+  /// 3. Verify payment on backend
+  ///
+  /// Usage:
+  /// ```dart
+  /// await controller.processPharmacyPaymentUnified(
+  ///   onSuccess: (response) {
+  ///     Get.to(() => OrderSuccessPage(orderId: response.orderId));
+  ///   },
+  ///   onFailure: (error) {
+  ///     Get.snackbar('Error', error);
+  ///   },
+  /// );
+  /// ```
+  Future<void> processPharmacyPaymentUnified({
+    String? notes,
+    List<OrderFee>? fees,
+    required Function(RazorpayVerificationResponse) onSuccess,
+    required Function(String error) onFailure,
+  }) async {
+    if (cart.value == null || cart.value!.cartItems.isEmpty) {
+      onFailure('Cart is empty');
+      return;
+    }
+
+    isPlacingOrder.value = true;
+
+    try {
+      // Get payment service
+      if (!Get.isRegistered<PaymentService>()) {
+        Get.put(PaymentService());
+      }
+      final paymentService = Get.find<PaymentService>();
+
+      // Get patient ID
+      final patientId = await paymentService.getCurrentPatientId();
+      if (patientId == null) {
+        onFailure('Unable to get patient information. Please login again.');
+        isPlacingOrder.value = false;
+        return;
+      }
+
+      // Convert cart items to order items
+      final orderItems = cart.value!.cartItems.map((cartItem) {
+        return OrderItem(
+          serviceId: cartItem.product.id,
+          contentType: ContentType.pharmacyProduct,
+          quantity: cartItem.quantity,
+        );
+      }).toList();
+
+      // Process payment using unified service
+      await paymentService.processPharmacyPayment(
+        items: orderItems,
+        patientId: patientId,
+        fees: fees,
+        notes: notes,
+        onSuccess: (verificationResponse) async {
+          // Reload cart and orders after successful payment
+          await loadCart();
+          await loadOrders();
+          isPlacingOrder.value = false;
+          onSuccess(verificationResponse);
+        },
+        onFailure: (errorMsg) {
+          isPlacingOrder.value = false;
+          onFailure(errorMsg);
+        },
+      );
+    } catch (e) {
+      isPlacingOrder.value = false;
+      error.value = e.toString();
+      onFailure(e.toString());
     }
   }
 }

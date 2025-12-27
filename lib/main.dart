@@ -13,6 +13,8 @@ import 'core/storage/token_storage.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_constants.dart';
 import 'core/theme/theme_controller.dart';
+import 'core/data/repositories/order_repository.dart';
+import 'core/services/payment_service.dart';
 import 'features/dashboard/presentation/pages/dashboard_shell.dart';
 import 'features/appointments/presentation/pages/book_appointment_page.dart';
 
@@ -23,8 +25,14 @@ Future<void> main() async {
   final authDio = DioFactory.createAuthDio();
   final authRepo = AuthRepository(authDio: authDio);
 
+  // Initialize core services
   Get.put(AuthController(repo: authRepo));
   Get.put(ThemeController());
+
+  // Initialize payment-related services
+  final hmsDio = DioFactory.createHmsDio();
+  Get.put(OrderRepository(dio: hmsDio));
+  Get.put(PaymentService());
 
   runApp(const MyApp());
 }

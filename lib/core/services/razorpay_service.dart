@@ -87,6 +87,83 @@ class RazorpayService {
     }
   }
 
+  /// Initialize payment with Razorpay (Backend Order Integration)
+  ///
+  /// This is the recommended approach for production as it creates an order
+  /// on the backend first, ensuring better security and order tracking.
+  ///
+  /// Parameters:
+  /// - [razorpayOrderId]: Order ID received from backend
+  /// - [razorpayKeyId]: Razorpay key ID from backend
+  /// - [amount]: Amount in INR (will be converted to paise automatically)
+  /// - [customerName]: Customer's name
+  /// - [customerEmail]: Customer's email
+  /// - [customerPhone]: Customer's phone number
+  /// - [description]: Payment description
+  /// - [onSuccess]: Callback when payment succeeds
+  /// - [onFailure]: Callback when payment fails
+  /// - [onWalletSelection]: Callback when external wallet is selected
+  void openCheckoutWithOrder({
+    required String razorpayOrderId,
+    required String razorpayKeyId,
+    required double amount,
+    required String customerName,
+    required String customerEmail,
+    required String customerPhone,
+    String? description,
+    required Function(PaymentSuccessResponse) onSuccess,
+    required Function(PaymentFailureResponse) onFailure,
+    Function()? onWalletSelection,
+  }) {
+    _onSuccess = onSuccess;
+    _onFailure = onFailure;
+    _onWalletSelection = onWalletSelection;
+
+    // Convert amount to paise (Razorpay uses smallest currency unit)
+    int amountInPaise = (amount * 100).toInt();
+
+    var options = {
+      'key': razorpayKeyId,
+      'amount': amountInPaise,
+      'currency': RazorpayConfig.currency,
+      'name': RazorpayConfig.companyName,
+      'description': description ?? RazorpayConfig.companyDescription,
+      'order_id': razorpayOrderId, // Backend generated order ID
+      'timeout': RazorpayConfig.timeoutDuration,
+      'prefill': {
+        'name': customerName,
+        'email': customerEmail,
+        'contact': customerPhone,
+      },
+      'theme': {
+        'color': '#${RazorpayConfig.themeColor}',
+      },
+    };
+
+    // Add company logo if available
+    if (RazorpayConfig.companyLogo.isNotEmpty) {
+      options['image'] = RazorpayConfig.companyLogo;
+    }
+
+    try {
+      log('🚀 Opening Razorpay with backend order: $razorpayOrderId');
+      log('Options: $options');
+      _razorpay.open(options);
+      log('✅ Razorpay.open() called successfully');
+    } catch (e) {
+      log('❌ Error opening Razorpay checkout: $e');
+      log('Stack trace: ${StackTrace.current}');
+      // Call failure callback with error
+      if (_onFailure != null) {
+        _onFailure!(PaymentFailureResponse(
+          0,
+          'Failed to open payment gateway: $e',
+          null,
+        ));
+      }
+    }
+  }
+
   /// Build list of enabled payment instruments
   List<Map<String, dynamic>> _buildInstrumentsList() {
     List<Map<String, dynamic>> instruments = [];

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/utils/app_colors.dart';
+import '../../../../core/services/payment_service.dart';
+import '../../../../core/features/payment/presentation/pages/payment_success_page.dart';
 
 class BookAppointmentPage extends StatefulWidget {
   const BookAppointmentPage({super.key});
@@ -284,20 +286,103 @@ class _BookAppointmentPageState extends State<BookAppointmentPage> {
     );
   }
 
-  void _confirmAppointment() {
-    // Show confirmation and navigate back or to appointment details
-    Get.snackbar(
-      'Appointment Booked',
-      'Your appointment has been scheduled for ${DateFormat('MMM dd, yyyy').format(selectedDate)} at $selectedTime',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
+  Future<void> _confirmAppointment() async {
+    // Show loading dialog
+    Get.dialog(
+      const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Processing payment...'),
+              ],
+            ),
+          ),
+        ),
+      ),
+      barrierDismissible: false,
     );
 
-    // Navigate back after a short delay
-    Future.delayed(const Duration(seconds: 1), () {
+    try {
+      // Initialize payment service if not already done
+      if (!Get.isRegistered<PaymentService>()) {
+        Get.put(PaymentService());
+      }
+
+      final paymentService = Get.find<PaymentService>();
+
+      // Get patient ID (you may need to fetch this from API or user profile)
+      final patientId = await paymentService.getCurrentPatientId();
+
+      if (patientId == null) {
+        Get.back(); // Close loading dialog
+        Get.snackbar(
+          'Error',
+          'Unable to get patient information. Please login again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      // For demo purposes, using dummy appointment ID
+      // In production, you would first create the appointment via API
+      // and then process payment with the returned appointment ID
+      const int appointmentId = 123; // This should come from appointment creation API
+      const double consultationFee = 500.0; // This should come from doctor's fee
+
+      // Close loading dialog
       Get.back();
-    });
+
+      // Process payment
+      await paymentService.processConsultationPayment(
+        appointmentId: appointmentId,
+        patientId: patientId,
+        amount: consultationFee,
+        notes: 'Consultation appointment for ${DateFormat('MMM dd, yyyy').format(selectedDate)} at $selectedTime',
+        onSuccess: (verificationResponse) {
+          // Payment successful - Navigate to success page
+          Get.off(() => PaymentSuccessPage(
+            verificationResponse: verificationResponse,
+            title: 'Appointment Confirmed!',
+            subtitle: 'Your consultation has been booked successfully.',
+            onContinue: () {
+              // Navigate back to dashboard or appointments
+              Get.back();
+              Get.back();
+            },
+          ));
+        },
+        onFailure: (error) {
+          // Payment failed
+          Get.snackbar(
+            'Payment Failed',
+            error,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            duration: const Duration(seconds: 4),
+          );
+        },
+      );
+    } catch (e) {
+      // Close loading dialog if still open
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
+      Get.snackbar(
+        'Error',
+        'Failed to process appointment: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 }
