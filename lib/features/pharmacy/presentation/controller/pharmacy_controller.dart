@@ -40,7 +40,9 @@ class PharmacyController extends GetxController {
     isLoadingProducts.value = true;
     error.value = '';
     try {
-      final data = await repo.fetchProducts();
+      // TODO: Get patient ID from user profile/session
+      // For now hardcoded as 1, will be converted to variable later
+      final data = await repo.fetchProducts(patientId: 1);
       products.assignAll(data);
       print('✅ Loaded ${data.length} products');
     } on ApiException catch (e) {
@@ -67,7 +69,9 @@ class PharmacyController extends GetxController {
   Future<void> loadCart() async {
     isLoadingCart.value = true;
     try {
-      final c = await repo.fetchCart();
+      // TODO: Get patient ID from user profile/session
+      // For now hardcoded as 1, will be converted to variable later
+      final c = await repo.fetchCart(patientId: 1);
       cart.value = c;
 
       // Initialize local cart items from server cart
@@ -132,7 +136,9 @@ class PharmacyController extends GetxController {
 
   Future<bool> clearCart() async {
     try {
-      final updated = await repo.clearCart();
+      // TODO: Get patient ID from user profile/session
+      // For now hardcoded as 1, will be converted to variable later
+      final updated = await repo.clearCart(patientId: 1);
       cart.value = updated;
       AppToast.showInfo('Cart cleared');
       return true;
@@ -226,8 +232,12 @@ class PharmacyController extends GetxController {
 
     isSyncingCart.value = true;
     try {
+      // TODO: Get patient ID from user profile/session
+      // For now hardcoded as 1, will be converted to variable later
+      const patientId = 1;
+
       // First, clear the backend cart to start fresh
-      await repo.clearCart();
+      await repo.clearCart(patientId: patientId);
 
       // Add all items from local cart to backend
       for (final entry in localCartItems.entries) {
@@ -238,6 +248,7 @@ class PharmacyController extends GetxController {
           await repo.addItem(
             productId: productId,
             quantity: quantity,
+            patientId: patientId,
           );
         }
       }

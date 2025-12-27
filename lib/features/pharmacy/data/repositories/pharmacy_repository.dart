@@ -46,11 +46,12 @@ class PharmacyRepository {
     return Options(headers: headers);
   }
 
-  Future<List<PharmacyProduct>> fetchProducts() async {
+  Future<List<PharmacyProduct>> fetchProducts({int? patientId}) async {
     try {
       await _ensureAuthHeader();
       final res = await dio.get(
         '/api/pharmacy/products/',
+        queryParameters: patientId != null ? {'patient_id': patientId} : null,
         options: await _authOptions(),
       );
       final data = res.data;
@@ -102,11 +103,12 @@ class PharmacyRepository {
     }
   }
 
-  Future<PharmacyCart> fetchCart() async {
+  Future<PharmacyCart> fetchCart({int? patientId}) async {
     try {
       await _ensureAuthHeader();
       final res = await dio.get(
         '/api/pharmacy/cart/',
+        queryParameters: patientId != null ? {'patient_id': patientId} : null,
         options: await _authOptions(),
       );
       final data = res.data;
@@ -134,6 +136,7 @@ class PharmacyRepository {
   Future<PharmacyCart> addItem({
     required int productId,
     required int quantity,
+    int? patientId,
   }) async {
     try {
       await _ensureAuthHeader();
@@ -142,6 +145,7 @@ class PharmacyRepository {
         data: {
           'product_id': productId,
           'quantity': quantity,
+          if (patientId != null) 'patient_id': patientId,
         },
         options: await _authOptions(),
       );
@@ -158,6 +162,7 @@ class PharmacyRepository {
   Future<PharmacyCart> updateItem({
     required int cartItemId,
     required int quantity,
+    int? patientId,
   }) async {
     try {
       await _ensureAuthHeader();
@@ -166,6 +171,7 @@ class PharmacyRepository {
         data: {
           'cart_item_id': cartItemId,
           'quantity': quantity,
+          if (patientId != null) 'patient_id': patientId,
         },
         options: await _authOptions(),
       );
@@ -181,6 +187,7 @@ class PharmacyRepository {
 
   Future<PharmacyCart> removeItem({
     required int cartItemId,
+    int? patientId,
   }) async {
     try {
       await _ensureAuthHeader();
@@ -188,6 +195,7 @@ class PharmacyRepository {
         '/api/pharmacy/cart/remove_item/',
         data: {
           'cart_item_id': cartItemId,
+          if (patientId != null) 'patient_id': patientId,
         },
         options: await _authOptions(),
       );
@@ -201,11 +209,12 @@ class PharmacyRepository {
     }
   }
 
-  Future<PharmacyCart> clearCart() async {
+  Future<PharmacyCart> clearCart({int? patientId}) async {
     try {
       await _ensureAuthHeader();
       final res = await dio.post(
         '/api/pharmacy/cart/clear/',
+        data: patientId != null ? {'patient_id': patientId} : null,
         options: await _authOptions(),
       );
       return PharmacyCart.fromJson(Map<String, dynamic>.from(res.data));
