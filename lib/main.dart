@@ -9,6 +9,7 @@ import 'core/features/auth/presentation/pages/dashboard_page.dart';
 import 'core/features/auth/presentation/pages/login_page.dart';
 import 'core/features/auth/presentation/pages/splash_page.dart';
 import 'core/network/dio_factory.dart';
+import 'core/network/hms_dio_factory.dart';
 import 'core/storage/token_storage.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_constants.dart';
@@ -30,7 +31,7 @@ Future<void> main() async {
   Get.put(ThemeController());
 
   // Initialize payment-related services
-  final hmsDio = DioFactory.createHmsDio();
+  final hmsDio = HmsDioFactory.create();
   Get.put(OrderRepository(dio: hmsDio));
   Get.put(PaymentService());
 
