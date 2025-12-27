@@ -236,11 +236,12 @@ class PharmacyRepository {
     }
   }
 
-  Future<List<PharmacyOrder>> fetchOrders() async {
+  Future<List<PharmacyOrder>> fetchOrders({int? patientId}) async {
     try {
       await _ensureAuthHeader();
       final res = await dio.get(
         '/api/pharmacy/orders/',
+        queryParameters: patientId != null ? {'patient_id': patientId} : null,
         options: await _authOptions(),
       );
       final data = res.data;

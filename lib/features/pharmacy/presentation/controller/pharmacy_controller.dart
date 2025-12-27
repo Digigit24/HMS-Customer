@@ -177,7 +177,9 @@ class PharmacyController extends GetxController {
 
   Future<void> loadOrders() async {
     try {
-      final data = await repo.fetchOrders();
+      // TODO: Get patient ID from user profile/session
+      // For now hardcoded as 1, will be converted to variable later
+      final data = await repo.fetchOrders(patientId: 1);
       orders.assignAll(data);
     } on ApiException catch (e) {
       error.value = e.message;
@@ -365,13 +367,9 @@ class PharmacyController extends GetxController {
       }
       final paymentService = Get.find<PaymentService>();
 
-      // Get patient ID
-      final patientId = await paymentService.getCurrentPatientId();
-      if (patientId == null) {
-        onFailure('Unable to get patient information. Please login again.');
-        isPlacingOrder.value = false;
-        return;
-      }
+      // TODO: Get patient ID from user profile/session
+      // For now hardcoded as 1, will be converted to variable later
+      final patientId = 1;
 
       // Convert cart items to order items
       final orderItems = cart.value!.cartItems.map((cartItem) {
