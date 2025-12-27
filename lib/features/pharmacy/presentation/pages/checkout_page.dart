@@ -4,6 +4,7 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/app_toast.dart';
 import '../../../../core/theme/theme_controller.dart';
+import '../../../../core/features/payment/presentation/pages/payment_success_page.dart';
 import '../../data/models/cart.dart';
 import '../controller/pharmacy_controller.dart';
 import '../widgets/razorpay_payment_sheet.dart';
@@ -807,8 +808,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
           // Navigate to success page
           if (mounted) {
-            Get.off(() => OrderSuccessPage(
-              order: null, // Order will be loaded from the response
+            Get.off(() => PaymentSuccessPage(
+              verificationResponse: verificationResponse,
+              title: 'Order Placed Successfully!',
             ));
           }
         },
