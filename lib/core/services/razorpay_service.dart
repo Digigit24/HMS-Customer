@@ -240,6 +240,7 @@ class RazorpayService {
           response['razorpay_payment_id']?.toString(),
           response['razorpay_order_id']?.toString(),
           response['razorpay_signature']?.toString(),
+          response, // Full response data
         );
         onSuccess(paymentResponse);
       },
