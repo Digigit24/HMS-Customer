@@ -537,14 +537,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Widget _buildBottomBar() {
-    final bgColor = themeController.isDarkMode
-        ? const Color(0xFF1E293B)
-        : Colors.white;
+    final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: bgColor,
+        color: theme.cardColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -562,7 +560,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
             child: ElevatedButton(
               onPressed: loading ? null : _confirmOrder,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: theme.colorScheme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -594,30 +592,31 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   Widget _buildEmptyState() {
+    final theme = Theme.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.shopping_cart_outlined,
-                size: 80, color: AppColors.primary),
+            Icon(Icons.shopping_cart_outlined,
+                size: 80, color: theme.colorScheme.primary),
             const SizedBox(height: 16),
-            const Text(
+            Text(
               'Your cart is empty',
-              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: theme.colorScheme.onSurface),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Add items from the pharmacy to continue.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Color(0xFF64748B)),
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () => Get.back(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: theme.colorScheme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
               ),
