@@ -301,18 +301,18 @@ class _PharmacyTabState extends State<PharmacyTab> {
             ),
             Expanded(
               child: Padding(
-                padding: EdgeInsets.all(context.padding(12.0)),
+                padding: EdgeInsets.all(context.padding(8.0)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.star, color: const Color(0xFFFBBF24), size: context.iconSize(14)),
-                        SizedBox(width: context.spacing(4)),
+                        Icon(Icons.star, color: const Color(0xFFFBBF24), size: context.iconSize(12)),
+                        SizedBox(width: context.spacing(3)),
                         Text(
                           '4.8',
                           style: TextStyle(
-                            fontSize: context.fontSize(12),
+                            fontSize: context.fontSize(11),
                             fontWeight: FontWeight.w600,
                             color: theme.colorScheme.onSurface,
                           ),
@@ -321,44 +321,48 @@ class _PharmacyTabState extends State<PharmacyTab> {
                         Text(
                           '(454)',
                           style: TextStyle(
-                            fontSize: context.fontSize(11),
+                            fontSize: context.fontSize(10),
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: context.spacing(6)),
+                    SizedBox(height: context.spacing(4)),
                     Text(
                       product.productName,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: context.fontSize(14),
+                        fontSize: context.fontSize(12),
                         fontWeight: FontWeight.w600,
                         color: theme.colorScheme.onSurface,
+                        height: 1.2,
                       ),
                     ),
-                    SizedBox(height: context.spacing(4)),
+                    SizedBox(height: context.spacing(3)),
                     Row(
                       children: [
                         Icon(
                           Icons.inventory_2_outlined,
-                          size: context.iconSize(12),
+                          size: context.iconSize(11),
                           color: (product.quantity ?? 0) < 10
                               ? Colors.red
                               : theme.colorScheme.onSurfaceVariant,
                         ),
-                        SizedBox(width: context.spacing(4)),
-                        Text(
-                          '${product.quantity ?? 0} in stock',
-                          style: TextStyle(
-                            fontSize: context.fontSize(11),
-                            color: (product.quantity ?? 0) < 10
-                                ? Colors.red
-                                : theme.colorScheme.onSurfaceVariant,
-                            fontWeight: (product.quantity ?? 0) < 10
-                                ? FontWeight.w600
-                                : FontWeight.normal,
+                        SizedBox(width: context.spacing(3)),
+                        Flexible(
+                          child: Text(
+                            '${product.quantity ?? 0} in stock',
+                            style: TextStyle(
+                              fontSize: context.fontSize(10),
+                              color: (product.quantity ?? 0) < 10
+                                  ? Colors.red
+                                  : theme.colorScheme.onSurfaceVariant,
+                              fontWeight: (product.quantity ?? 0) < 10
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
@@ -369,19 +373,22 @@ class _PharmacyTabState extends State<PharmacyTab> {
                         Text(
                           '₹${price.toStringAsFixed(2)}',
                           style: TextStyle(
-                            fontSize: context.fontSize(16),
+                            fontSize: context.fontSize(14),
                             fontWeight: FontWeight.w700,
                             color: primaryColor,
                           ),
                         ),
                         if (discount > 0) ...[
-                          SizedBox(width: context.spacing(6)),
-                          Text(
-                            '₹${originalPrice.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontSize: context.fontSize(11),
-                              decoration: TextDecoration.lineThrough,
-                              color: theme.colorScheme.onSurfaceVariant,
+                          SizedBox(width: context.spacing(4)),
+                          Flexible(
+                            child: Text(
+                              '₹${originalPrice.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontSize: context.fontSize(10),
+                                decoration: TextDecoration.lineThrough,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -396,15 +403,15 @@ class _PharmacyTabState extends State<PharmacyTab> {
               final qty = controller.getQuantity(product.id);
               return Padding(
                 padding: EdgeInsets.fromLTRB(
-                  context.padding(12),
+                  context.padding(8),
                   0,
-                  context.padding(12),
-                  context.padding(12),
+                  context.padding(8),
+                  context.padding(8),
                 ),
                 child: qty == 0
                     ? SizedBox(
                         width: double.infinity,
-                        height: 36,
+                        height: 32,
                         child: ElevatedButton(
                           onPressed: () {
                             controller.addToCart(product);
@@ -421,14 +428,14 @@ class _PharmacyTabState extends State<PharmacyTab> {
                           child: Text(
                             'Add to Cart',
                             style: TextStyle(
-                              fontSize: context.fontSize(13),
+                              fontSize: context.fontSize(12),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                       )
                     : Container(
-                        height: 36,
+                        height: 32,
                         decoration: BoxDecoration(
                           border: Border.all(color: primaryColor, width: 1.5),
                           borderRadius: BorderRadius.circular(8),
@@ -445,12 +452,12 @@ class _PharmacyTabState extends State<PharmacyTab> {
                                 bottomLeft: Radius.circular(8),
                               ),
                               child: Container(
-                                width: 36,
-                                height: 36,
+                                width: 32,
+                                height: 32,
                                 alignment: Alignment.center,
                                 child: Icon(
                                   Icons.remove,
-                                  size: context.iconSize(18),
+                                  size: context.iconSize(16),
                                   color: primaryColor,
                                 ),
                               ),
@@ -458,7 +465,7 @@ class _PharmacyTabState extends State<PharmacyTab> {
                             Text(
                               qty.toString(),
                               style: TextStyle(
-                                fontSize: context.fontSize(14),
+                                fontSize: context.fontSize(13),
                                 fontWeight: FontWeight.w600,
                                 color: primaryColor,
                               ),
@@ -472,12 +479,12 @@ class _PharmacyTabState extends State<PharmacyTab> {
                                 bottomRight: Radius.circular(8),
                               ),
                               child: Container(
-                                width: 36,
-                                height: 36,
+                                width: 32,
+                                height: 32,
                                 alignment: Alignment.center,
                                 child: Icon(
                                   Icons.add,
-                                  size: context.iconSize(18),
+                                  size: context.iconSize(16),
                                   color: primaryColor,
                                 ),
                               ),

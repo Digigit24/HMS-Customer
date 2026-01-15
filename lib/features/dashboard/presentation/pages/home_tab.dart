@@ -19,6 +19,11 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
+  String get _userName {
+    // TODO: Fetch from user profile service when implemented
+    return 'Guest';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -51,7 +56,7 @@ class _HomeTabState extends State<HomeTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hi Dwiky!',
+                      'Hi $_userName!',
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         fontSize: context.fontSize(20),
