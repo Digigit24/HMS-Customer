@@ -60,8 +60,8 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                 ),
                 child: Text(
                   count.toString(),
-                  style: const TextStyle(
-                    color: AppColors.primary,
+                  style: TextStyle(
+                    color: theme.colorScheme.primary,
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                   ),
@@ -113,6 +113,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   }
 
   Widget _buildAddressSection() {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -121,12 +122,12 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Address Shipping',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1E293B),
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               TextButton(
@@ -136,10 +137,10 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-                child: const Text(
+                child: Text(
                   'Change',
                   style: TextStyle(
-                    color: AppColors.primary,
+                    color: theme.colorScheme.primary,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
@@ -150,14 +151,14 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.location_on_outlined,
-                  size: 16, color: Color(0xFF64748B)),
+              Icon(Icons.location_on_outlined,
+                  size: 16, color: theme.colorScheme.onSurfaceVariant),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 '23 Estean, New York City, USA',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Color(0xFF64748B),
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -168,6 +169,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   }
 
   Widget _buildCartItem(PharmacyCartItem item) {
+    final theme = Theme.of(context);
     final price = item.totalPrice ??
         item.priceAtTime ??
         (item.product.sellingPrice ?? item.product.mrp ?? 0);
@@ -179,7 +181,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
           width: 72,
           height: 72,
           decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.06),
+            color: theme.colorScheme.primary.withOpacity(0.06),
             borderRadius: BorderRadius.circular(12),
           ),
           clipBehavior: Clip.antiAlias,
@@ -188,9 +190,9 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                   item.product.imageUrl!,
                   fit: BoxFit.cover,
                   errorBuilder: (_, __, ___) =>
-                      const Icon(Icons.local_pharmacy, color: AppColors.primary, size: 32),
+                      Icon(Icons.local_pharmacy, color: theme.colorScheme.primary, size: 32),
                 )
-              : const Icon(Icons.local_pharmacy, color: AppColors.primary, size: 32),
+              : Icon(Icons.local_pharmacy, color: theme.colorScheme.primary, size: 32),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -201,25 +203,25 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                 item.product.productName,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
-                  color: Color(0xFF1E293B),
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 '${item.product.category?.name ?? 'Tablets'} • 60 Gummies',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
-                  color: Color(0xFF64748B),
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 '₹${price.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  color: AppColors.primary,
+                style: TextStyle(
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
                 ),
@@ -232,7 +234,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
         IconButton(
           onPressed: () => _removeItem(item),
           icon: const Icon(Icons.delete_outline),
-          color: const Color(0xFF64748B),
+          color: theme.colorScheme.onSurfaceVariant,
           constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
           padding: EdgeInsets.zero,
         ),
@@ -241,10 +243,11 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   }
 
   Widget _buildQuantityControls(PharmacyCartItem item) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -255,7 +258,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
             alignment: Alignment.center,
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
-              color: AppColors.primary,
+              color: theme.colorScheme.primary,
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
@@ -274,13 +277,14 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   }
 
   Widget _buildControlButton(IconData icon, VoidCallback onPressed) {
+    final theme = Theme.of(context);
     return SizedBox(
       width: 36,
       height: 36,
       child: IconButton(
         onPressed: onPressed,
         icon: Icon(icon, size: 18),
-        color: const Color(0xFF64748B),
+        color: theme.colorScheme.onSurfaceVariant,
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints(),
       ),
@@ -288,19 +292,20 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   }
 
   Widget _buildVoucherSection() {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          const Icon(Icons.card_giftcard_outlined,
-              size: 20, color: Color(0xFF64748B)),
+          Icon(Icons.card_giftcard_outlined,
+              size: 20, color: theme.colorScheme.onSurfaceVariant),
           const SizedBox(width: 8),
-          const Expanded(
+          Expanded(
             child: Text(
               'MediXpert Voucher',
               style: TextStyle(
                 fontSize: 14,
-                color: Color(0xFF64748B),
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -308,23 +313,23 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
             onPressed: () {},
             style: TextButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              backgroundColor: AppColors.primary.withOpacity(0.08),
+              backgroundColor: theme.colorScheme.primary.withOpacity(0.08),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
             child: Row(
-              children: const [
+              children: [
                 Text(
                   'MEDIXPERT',
                   style: TextStyle(
-                    color: AppColors.primary,
+                    color: theme.colorScheme.primary,
                     fontWeight: FontWeight.w700,
                     fontSize: 12,
                   ),
                 ),
-                SizedBox(width: 4),
-                Icon(Icons.chevron_right, color: AppColors.primary, size: 18),
+                const SizedBox(width: 4),
+                Icon(Icons.chevron_right, color: theme.colorScheme.primary, size: 18),
               ],
             ),
           ),
@@ -334,10 +339,11 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   }
 
   Widget _buildBottomBar(PharmacyCart cart) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -355,21 +361,21 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
+                Text(
                   'Total',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Color(0xFF64748B),
+                    color: theme.colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '₹${cart.totalAmount.toStringAsFixed(2)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF1E293B),
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -379,7 +385,7 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                 Get.to(() => CheckoutPage(controller: widget.controller));
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: theme.colorScheme.primary,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -387,8 +393,8 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
                 ),
                 elevation: 0,
               ),
-              child: Row(
-                children: const [
+              child: const Row(
+                children: [
                   Text(
                     'Check out',
                     style: TextStyle(

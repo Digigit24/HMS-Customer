@@ -182,7 +182,7 @@ class _HomeTabState extends State<HomeTab> {
                   title: 'Prevent the spread\nof COVID-19 Virus',
                   subtitle: 'Find out how',
                   icon: Icons.coronavirus_outlined,
-                  backgroundColor: const Color(0xFF4F46E5),
+                  backgroundColor: theme.colorScheme.primary,
                   iconColor: Colors.white.withOpacity(0.3),
                   onTap: () {
                     // TODO: Navigate to COVID info
