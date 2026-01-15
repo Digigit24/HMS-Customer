@@ -13,6 +13,7 @@ import 'core/storage/token_storage.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_constants.dart';
 import 'core/theme/theme_controller.dart';
+import 'core/services/user_service.dart';
 import 'features/dashboard/presentation/pages/dashboard_shell.dart';
 import 'features/appointments/presentation/pages/book_appointment_page.dart';
 
@@ -25,6 +26,7 @@ Future<void> main() async {
 
   Get.put(AuthController(repo: authRepo));
   Get.put(ThemeController());
+  await Get.putAsync(() => UserService().init());
 
   runApp(const MyApp());
 }

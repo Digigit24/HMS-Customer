@@ -7,6 +7,7 @@ import '../../../../core/theme/theme_constants.dart';
 import '../../../../core/theme/theme_controller.dart';
 import 'appointment_history_page.dart';
 import 'order_history_page.dart';
+import 'profile_page.dart';
 
 class SettingsTab extends StatelessWidget {
   const SettingsTab({super.key});
@@ -123,7 +124,9 @@ class SettingsTab extends StatelessWidget {
                       icon: Icons.person_outline,
                       title: 'Profile',
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () {},
+                      onTap: () {
+                        Get.to(() => const ProfilePage());
+                      },
                     ),
                     const Divider(height: 1),
                     _SettingItem(
