@@ -6,6 +6,7 @@ import 'package:animate_do/animate_do.dart';
 import '../../../../core/widgets/custom_search_bar.dart';
 import '../../../../core/theme/theme_constants.dart';
 import '../../../../core/utils/responsive_utils.dart';
+import '../../../../core/services/user_service.dart';
 import '../../../appointments/presentation/controller/appointments_controller.dart';
 import '../widgets/dashboard_feature_card.dart';
 import '../widgets/appointment_card.dart';
@@ -19,6 +20,16 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
+  String get _userName {
+    try {
+      final userService = Get.find<UserService>();
+      return userService.userName ?? 'Guest';
+    } catch (e) {
+      print('UserService not found: $e');
+      return 'Guest';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -51,7 +62,7 @@ class _HomeTabState extends State<HomeTab> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hi Dwiky!',
+                      'Hi $_userName!',
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                         fontSize: context.fontSize(20),
@@ -177,7 +188,7 @@ class _HomeTabState extends State<HomeTab> {
                   title: 'Prevent the spread\nof COVID-19 Virus',
                   subtitle: 'Find out how',
                   icon: Icons.coronavirus_outlined,
-                  backgroundColor: const Color(0xFF4F46E5),
+                  backgroundColor: theme.colorScheme.primary,
                   iconColor: Colors.white.withOpacity(0.3),
                   onTap: () {
                     // TODO: Navigate to COVID info

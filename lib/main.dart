@@ -14,8 +14,7 @@ import 'core/storage/token_storage.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_constants.dart';
 import 'core/theme/theme_controller.dart';
-import 'core/data/repositories/order_repository.dart';
-import 'core/services/payment_service.dart';
+import 'core/services/user_service.dart';
 import 'features/dashboard/presentation/pages/dashboard_shell.dart';
 import 'features/appointments/presentation/pages/book_appointment_page.dart';
 
@@ -29,11 +28,7 @@ Future<void> main() async {
   // Initialize core services
   Get.put(AuthController(repo: authRepo));
   Get.put(ThemeController());
-
-  // Initialize payment-related services
-  final hmsDio = HmsDioFactory.create();
-  Get.put(OrderRepository(dio: hmsDio));
-  Get.put(PaymentService());
+  await Get.putAsync(() => UserService().init());
 
   runApp(const MyApp());
 }

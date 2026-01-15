@@ -48,10 +48,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: SafeArea(
         child: Column(
@@ -59,29 +62,29 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           children: [
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 border: Border(
-                  bottom: BorderSide(color: Color(0xFFE2E8F0)),
+                  bottom: BorderSide(color: theme.dividerColor),
                 ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Filter',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF1E293B),
+                      color: theme.colorScheme.onSurface,
                     ),
                   ),
                   RichText(
-                    text: const TextSpan(
+                    text: TextSpan(
                       text: 'Filter ',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF1E293B),
+                        color: theme.colorScheme.onSurface,
                       ),
                       children: [
                         TextSpan(
@@ -89,7 +92,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w400,
-                            color: Color(0xFF94A3B8),
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -98,7 +101,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close),
-                    color: const Color(0xFF64748B),
+                    color: theme.colorScheme.onSurfaceVariant,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
                   ),
@@ -111,13 +114,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSection('Brand', brands, selectedBrand, (value) {
+                    _buildSection(theme, 'Brand', brands, selectedBrand, (value) {
                       setState(() {
                         selectedBrand = value == selectedBrand ? null : value;
                       });
                     }),
                     const SizedBox(height: 20),
-                    _buildSection('Location', locations, selectedLocation,
+                    _buildSection(theme, 'Location', locations, selectedLocation,
                         (value) {
                       setState(() {
                         selectedLocation =
@@ -125,9 +128,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       });
                     }),
                     const SizedBox(height: 20),
-                    _buildPriceSection(),
+                    _buildPriceSection(theme),
                     const SizedBox(height: 20),
-                    _buildRatingSection(),
+                    _buildRatingSection(theme),
                     const SizedBox(height: 32),
                   ],
                 ),
@@ -136,7 +139,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.cardColor,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.08),
@@ -190,6 +193,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   }
 
   Widget _buildSection(
+    ThemeData theme,
     String title,
     List<String> items,
     String? selected,
@@ -209,8 +213,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.primary
-                      : const Color(0xFFF1F5F9),
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -218,8 +222,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color:
-                        isSelected ? Colors.white : const Color(0xFF64748B),
+                    color: isSelected
+                        ? theme.colorScheme.onPrimary
+                        : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -239,19 +244,19 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
+                  children: [
                     Text(
                       'View all',
                       style: TextStyle(
-                        color: Color(0xFF64748B),
+                        color: theme.colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
                     ),
-                    SizedBox(width: 4),
+                    const SizedBox(width: 4),
                     Icon(
                       Icons.keyboard_arrow_down,
-                      color: Color(0xFF64748B),
+                      color: theme.colorScheme.onSurfaceVariant,
                       size: 18,
                     ),
                   ],
@@ -263,7 +268,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     );
   }
 
-  Widget _buildPriceSection() {
+  Widget _buildPriceSection(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -273,12 +278,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Min',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF64748B),
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -286,16 +291,16 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
+                      color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      border: Border.all(color: theme.dividerColor),
                     ),
                     child: Text(
                       minPrice.toInt().toString(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
+                        color: theme.colorScheme.primary,
                       ),
                     ),
                   ),
@@ -307,12 +312,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Max',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF64748B),
+                      color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -320,16 +325,16 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
+                      color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                      border: Border.all(color: theme.dividerColor),
                     ),
                     child: Text(
                       maxPrice.toInt().toString(),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
+                        color: theme.colorScheme.primary,
                       ),
                     ),
                   ),
@@ -366,8 +371,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.primary
-                      : const Color(0xFFF1F5F9),
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -375,8 +380,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color:
-                        isSelected ? Colors.white : const Color(0xFF64748B),
+                    color: isSelected
+                        ? theme.colorScheme.onPrimary
+                        : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -387,7 +393,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     );
   }
 
-  Widget _buildRatingSection() {
+  Widget _buildRatingSection(ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -406,8 +412,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.primary
-                      : const Color(0xFFF1F5F9),
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -415,8 +421,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color:
-                        isSelected ? Colors.white : const Color(0xFF64748B),
+                    color: isSelected
+                        ? theme.colorScheme.onPrimary
+                        : theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),

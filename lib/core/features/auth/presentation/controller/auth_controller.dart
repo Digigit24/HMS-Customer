@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../../../../network/api_exceptions.dart';
 import '../../../../storage/token_storage.dart';
+import '../../../../services/user_service.dart';
 import '../../data/models/login_request.dart';
 import '../../data/repositories/auth_repository.dart';
 
@@ -42,6 +43,24 @@ class AuthController extends GetxController {
         userId: res.userId,
       );
 
+      // TODO: Update UserService with actual user data from login response
+      // The repository prints the raw response - check console for structure
+      // Then uncomment and update this call:
+      // try {
+      //   final userService = Get.find<UserService>();
+      //   await userService.setUserFromLoginResponse({
+      //     'user': {
+      //       'name': 'User Name from API',
+      //       'email': 'email@example.com',
+      //       'phone': '+1234567890',
+      //       'address': 'User address',
+      //     }
+      //   });
+      //   print('User data saved: ${userService.userName}');
+      // } catch (e) {
+      //   print('Failed to save user data: $e');
+      // }
+
       Get.offAllNamed('/dashboard');
     } on ApiException catch (e) {
       errorText.value = e.message;
@@ -54,6 +73,10 @@ class AuthController extends GetxController {
 
   Future<void> logout() async {
     await TokenStorage.instance.clear();
+    try {
+      final userService = Get.find<UserService>();
+      await userService.clearUserData();
+    } catch (_) {}
     Get.offAllNamed('/login');
   }
 }
