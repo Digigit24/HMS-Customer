@@ -223,75 +223,75 @@ class _PharmacyTabState extends State<PharmacyTab> {
         ? ((originalPrice - price) / originalPrice * 100).round()
         : 0;
 
-    return InkWell(
-      onTap: () {
-        Get.to(() => ProductDetailPage(
-          product: product,
-          controller: controller,
-        ));
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.cardColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: theme.dividerColor),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: theme.dividerColor),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Product Image with Discount Badge
+          InkWell(
+            onTap: () {
+              Get.to(() => ProductDetailPage(
+                product: product,
+                controller: controller,
+              ));
+            },
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            child: Stack(
               children: [
                 Container(
-                  height: 120,
+                  height: 100,
+                  width: double.infinity,
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surfaceContainerHighest,
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(12)),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
                   ),
                   child: Center(
-                    child: product.imageUrl != null &&
-                            product.imageUrl!.isNotEmpty
+                    child: product.imageUrl != null && product.imageUrl!.isNotEmpty
                         ? Image.network(
                             product.imageUrl!,
-                            height: 80,
+                            height: 70,
                             fit: BoxFit.contain,
                             errorBuilder: (_, __, ___) => Icon(
                               Icons.local_pharmacy,
-                              size: context.iconSize(48),
+                              size: 40,
                               color: primaryColor,
                             ),
                           )
                         : Icon(
                             Icons.local_pharmacy,
-                            size: context.iconSize(48),
+                            size: 40,
                             color: primaryColor,
                           ),
                   ),
                 ),
                 if (discount > 0)
                   Positioned(
-                    top: 8,
-                    left: 8,
+                    top: 6,
+                    left: 6,
                     child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: context.padding(8), vertical: context.padding(4)),
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                       decoration: BoxDecoration(
                         color: primaryColor,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
                         '-$discount%',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
-                          fontSize: context.fontSize(11),
+                          fontSize: 10,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -299,203 +299,213 @@ class _PharmacyTabState extends State<PharmacyTab> {
                   ),
               ],
             ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.all(context.padding(8.0)),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+
+          // Product Info
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Rating
+                Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Row(
-                      children: [
-                        Icon(Icons.star, color: const Color(0xFFFBBF24), size: context.iconSize(12)),
-                        SizedBox(width: context.spacing(3)),
-                        Text(
-                          '4.8',
-                          style: TextStyle(
-                            fontSize: context.fontSize(11),
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurface,
-                          ),
-                        ),
-                        SizedBox(width: context.spacing(2)),
-                        Text(
-                          '(454)',
-                          style: TextStyle(
-                            fontSize: context.fontSize(10),
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: context.spacing(4)),
+                    const Icon(Icons.star, color: Color(0xFFFBBF24), size: 12),
+                    const SizedBox(width: 2),
                     Text(
-                      product.productName,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      '4.8',
                       style: TextStyle(
-                        fontSize: context.fontSize(12),
+                        fontSize: 11,
                         fontWeight: FontWeight.w600,
                         color: theme.colorScheme.onSurface,
-                        height: 1.2,
                       ),
                     ),
-                    SizedBox(height: context.spacing(3)),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.inventory_2_outlined,
-                          size: context.iconSize(11),
-                          color: (product.quantity ?? 0) < 10
-                              ? Colors.red
-                              : theme.colorScheme.onSurfaceVariant,
-                        ),
-                        SizedBox(width: context.spacing(3)),
-                        Flexible(
-                          child: Text(
-                            '${product.quantity ?? 0} in stock',
-                            style: TextStyle(
-                              fontSize: context.fontSize(10),
-                              color: (product.quantity ?? 0) < 10
-                                  ? Colors.red
-                                  : theme.colorScheme.onSurfaceVariant,
-                              fontWeight: (product.quantity ?? 0) < 10
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Row(
-                      children: [
-                        Text(
-                          '₹${price.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontSize: context.fontSize(14),
-                            fontWeight: FontWeight.w700,
-                            color: primaryColor,
-                          ),
-                        ),
-                        if (discount > 0) ...[
-                          SizedBox(width: context.spacing(4)),
-                          Flexible(
-                            child: Text(
-                              '₹${originalPrice.toStringAsFixed(2)}',
-                              style: TextStyle(
-                                fontSize: context.fontSize(10),
-                                decoration: TextDecoration.lineThrough,
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      ],
+                    const SizedBox(width: 2),
+                    Text(
+                      '(454)',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ),
-            // Add to Cart button
-            Obx(() {
-              final qty = controller.getQuantity(product.id);
-              return Padding(
-                padding: EdgeInsets.fromLTRB(
-                  context.padding(8),
-                  0,
-                  context.padding(8),
-                  context.padding(8),
+                const SizedBox(height: 4),
+
+                // Product Name
+                Text(
+                  product.productName,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
+                    height: 1.3,
+                  ),
                 ),
-                child: qty == 0
-                    ? SizedBox(
-                        width: double.infinity,
-                        height: 32,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            controller.addToCart(product);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.zero,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            'Add to Cart',
-                            style: TextStyle(
-                              fontSize: context.fontSize(12),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                const SizedBox(height: 4),
+
+                // Stock Info
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.inventory_2_outlined,
+                      size: 11,
+                      color: (product.quantity ?? 0) < 10
+                          ? Colors.red
+                          : theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 3),
+                    Flexible(
+                      child: Text(
+                        '${product.quantity ?? 0} in stock',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: (product.quantity ?? 0) < 10
+                              ? Colors.red
+                              : theme.colorScheme.onSurfaceVariant,
+                          fontWeight: (product.quantity ?? 0) < 10
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                         ),
-                      )
-                    : Container(
-                        height: 32,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: primaryColor, width: 1.5),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            InkWell(
-                              onTap: () {
-                                controller.decrementItem(product);
-                              },
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(8),
-                                bottomLeft: Radius.circular(8),
-                              ),
-                              child: Container(
-                                width: 32,
-                                height: 32,
-                                alignment: Alignment.center,
-                                child: Icon(
-                                  Icons.remove,
-                                  size: context.iconSize(16),
-                                  color: primaryColor,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              qty.toString(),
-                              style: TextStyle(
-                                fontSize: context.fontSize(13),
-                                fontWeight: FontWeight.w600,
-                                color: primaryColor,
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                controller.incrementItem(product);
-                              },
-                              borderRadius: const BorderRadius.only(
-                                topRight: Radius.circular(8),
-                                bottomRight: Radius.circular(8),
-                              ),
-                              child: Container(
-                                width: 32,
-                                height: 32,
-                                alignment: Alignment.center,
-                                child: Icon(
-                                  Icons.add,
-                                  size: context.iconSize(16),
-                                  color: primaryColor,
-                                ),
-                              ),
-                            ),
-                          ],
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+
+                // Price
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '₹${price.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: primaryColor,
+                      ),
+                    ),
+                    if (discount > 0) ...[
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          '₹${originalPrice.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            fontSize: 9,
+                            decoration: TextDecoration.lineThrough,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // Add to Cart Button
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+            child: Obx(() {
+              final qty = controller.getQuantity(product.id);
+
+              if (qty == null || qty == 0) {
+                return SizedBox(
+                  width: double.infinity,
+                  height: 30,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      controller.addToCart(product);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Add to Cart',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                );
+              }
+
+              return Container(
+                height: 30,
+                decoration: BoxDecoration(
+                  border: Border.all(color: primaryColor, width: 1.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        controller.decrementItem(product);
+                      },
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(6),
+                        bottomLeft: Radius.circular(6),
+                      ),
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.remove,
+                          size: 14,
+                          color: primaryColor,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      qty.toString(),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: primaryColor,
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        controller.incrementItem(product);
+                      },
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(6),
+                        bottomRight: Radius.circular(6),
+                      ),
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        alignment: Alignment.center,
+                        child: Icon(
+                          Icons.add,
+                          size: 14,
+                          color: primaryColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               );
             }),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
